@@ -129,6 +129,10 @@ void AES::ExpandKey (uint8_t *key){
     uint8_t roundKeysNeeded = (this->Nr + 1);
     uint8_t tmp[4];
 
+#ifdef AES_DEBUG
+        printf("ExpandKey (with %u bits key)\n\n", this->keySize);
+#endif
+
     // for each word in our needed round keys
     for (uint8_t i = 0; i < Nb * roundKeysNeeded; i++){
 
@@ -445,7 +449,7 @@ uint8_t AES::XTime (uint8_t number){
 
 uint8_t AES::GMultiply (uint8_t number, uint8_t multiplier){
     
-    // all add operations are done following by mod 2 in GF(2^8), this can be simplified to XOR
+    // all add operations are done followed by mod 2 in GF(2^8), this can be simplified to XOR
     return (
         // if first bit is set in multiplier, add number to result
         ((multiplier & 1) * number) ^
