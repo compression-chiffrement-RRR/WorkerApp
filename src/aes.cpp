@@ -10,7 +10,6 @@ using namespace std;
 #endif
 
 #ifdef AES_DEBUG
-    static void display_word (uint8_t *word, const char *debug);
     static void display_word (uint8_t *word, const char *debug){
         printf("%s: 0x%02x%02x%02x%02x\n", debug, word[0], word[1], word[2], word[3]);
     }
@@ -176,7 +175,7 @@ void AES::ExpandKey (uint8_t *key){
             display_word(tmp, "After SubWord()");
 #endif
 
-            // we XOR only the first byte cause Rcon constant has 3 null bytes after its most high order byte.
+            // we XOR only the first byte cause Rcon constant has 3 null bytes after its highest order byte.
             // Only this high order byte is multiplied by 2 in GF(2^8) for each step of Rcon.
             tmp[0] ^= Rcon[i/this->Nk];
 
@@ -361,7 +360,7 @@ void AES::InvShiftRows (uint8_t state[Nb][Nl]){
 
     This is done by left shifting (each monomial is multiplied by X, so for e.g 1 becomes X, X becomes X^2 ,X^2 becomes X^3...etc) in the first place.
 
-    Then we might need to reduce the result, if the input number had the most significant bit set, otherwise we go out of the field by having an X^7 monomial transformed to X^8.
+    Then we  need to reduce the result if the input number had the most significant bit set, otherwise we go out of the field by having an X^7 monomial transformed to X^8.
 
     The reduction could be done by applying the modulo operation to the result with any irreducible polynomial of a highest degree of 8 (with a X^8 monomial as the highest).
     

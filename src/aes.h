@@ -9,6 +9,10 @@
 
 #define AES_DEBUG 1
 
+#ifdef AES_DEBUG
+static void display_word (uint8_t *word, const char *debug);
+#endif
+
 // number of columns in one block.
 #define Nb 4
 // number of lines in one block (not actually part of the specification).
