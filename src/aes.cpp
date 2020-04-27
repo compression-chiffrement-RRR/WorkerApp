@@ -213,9 +213,9 @@ void AES::ExpandKey (uint8_t *key){
 }
 
 #ifdef AES_DEBUG
-    static void DisplayWord (uint8_t *word, const char *debug){
-        printf("%s: 0x%02x%02x%02x%02x\n", debug, word[0], word[1], word[2], word[3]);
-    }
+void DisplayWord (uint8_t *word, const char *debug){
+    printf("%s: 0x%02x%02x%02x%02x\n", debug, word[0], word[1], word[2], word[3]);
+}
 #endif
 
 // Apply S-Box substitution to a single word (4 bytes), to be used inside the ExpandKey method.
