@@ -9,11 +9,6 @@ using namespace std;
 
 #endif
 
-#ifdef AES_DEBUG
-    static void display_word (uint8_t *word, const char *debug){
-        printf("%s: 0x%02x%02x%02x%02x\n", debug, word[0], word[1], word[2], word[3]);
-    }
-#endif
 
 /*
     Rijndael cipher S-box substitution table.
@@ -148,7 +143,7 @@ void AES::ExpandKey (uint8_t *key){
             memcpy(this->RoundKeys + (i * 4), key + (i * 4), 4);
 
 #ifdef AES_DEBUG
-            display_word(this->RoundKeys + (i * 4), "original key");
+            DisplayWord(this->RoundKeys + (i * 4), "original key");
             printf("\n\n");
 #endif
 
@@ -158,7 +153,7 @@ void AES::ExpandKey (uint8_t *key){
         memcpy(tmp, this->RoundKeys + ((i - 1) * 4), 4);
 
 #ifdef AES_DEBUG
-        display_word(tmp, "tmp");
+        DisplayWord(tmp, "tmp");
 #endif
 
         if (i % this->Nk == 0){
@@ -166,13 +161,13 @@ void AES::ExpandKey (uint8_t *key){
             this->RotWord(tmp);
 
 #ifdef AES_DEBUG
-            display_word(tmp, "After RotWord()");
+            DisplayWord(tmp, "After RotWord()");
 #endif
 
             this->SubWord(tmp);
 
 #ifdef AES_DEBUG   
-            display_word(tmp, "After SubWord()");
+            DisplayWord(tmp, "After SubWord()");
 #endif
 
             // we XOR only the first byte cause Rcon constant has 3 null bytes after its highest order byte.
@@ -180,7 +175,7 @@ void AES::ExpandKey (uint8_t *key){
             tmp[0] ^= Rcon[i/this->Nk];
 
 #ifdef AES_DEBUG
-            display_word(tmp, "After XOR Rcon[i]");
+            DisplayWord(tmp, "After XOR Rcon[i]");
 #endif            
 
             this->RoundKeys[(i * 4)]      = tmp[0];
@@ -194,7 +189,7 @@ void AES::ExpandKey (uint8_t *key){
             this->SubWord(tmp);
 
 #ifdef AES_DEBUG   
-            display_word(tmp, "After Subword()");
+            DisplayWord(tmp, "After Subword()");
 #endif
 
             this->RoundKeys[(i * 4)]      = tmp[0];
@@ -211,11 +206,17 @@ void AES::ExpandKey (uint8_t *key){
         this->RoundKeys[(i * 4) + 3]  ^= tmp[3];
 
 #ifdef AES_DEBUG   
-        display_word(this->RoundKeys + (i * 4), "After XOR w[i-Nk]");
+        DisplayWord(this->RoundKeys + (i * 4), "After XOR w[i-Nk]");
         printf("\n\n");
 #endif
     }
 }
+
+#ifdef AES_DEBUG
+    static void DisplayWord (uint8_t *word, const char *debug){
+        printf("%s: 0x%02x%02x%02x%02x\n", debug, word[0], word[1], word[2], word[3]);
+    }
+#endif
 
 // Apply S-Box substitution to a single word (4 bytes), to be used inside the ExpandKey method.
 void AES::SubWord (uint8_t *word){
