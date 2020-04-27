@@ -58,9 +58,6 @@ class AES {
 
     uint8_t *RoundKeys;
 
-    // The main block encryption method.
-    void Cipher(uint8_t state[Nb][Nl]);
-
     // Key expansion step, in order to produces keys for each round from the main one.
     void ExpandKey (uint8_t *key);
 
@@ -91,8 +88,13 @@ class AES {
     
     public:
 
-    // The AES constructor takes only one parameter, which is the key size that you want to use (128, 192 or 256 bits).
-    AES(AESKeySize keySize);
+    // The main block encryption method.
+    void Cipher(uint8_t state[Nb][Nl]);
+
+    // The AES constructor.
+    // First parameter is the key.
+    // Second parameter is the key size.
+    AES(uint8_t *key, AESKeySize keySize);
     ~AES();
 
     /* 

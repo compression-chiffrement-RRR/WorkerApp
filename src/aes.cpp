@@ -9,6 +9,13 @@ using namespace std;
 
 #endif
 
+#ifdef AES_DEBUG
+    static void display_word (uint8_t *word, const char *debug);
+    static void display_word (uint8_t *word, const char *debug){
+        printf("%s: 0x%02x%02x%02x%02x\n", debug, word[0], word[1], word[2], word[3]);
+    }
+#endif
+
 /*
     Rijndael cipher S-box substitution table.
 */
@@ -51,7 +58,7 @@ static const uint8_t RSBox[256] = {
     0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d 
 };
 
-AES::AES (AESKeySize keySize){
+AES::AES (uint8_t *key, AESKeySize keySize){
 
     this->keySize = keySize;
 
@@ -76,18 +83,13 @@ AES::AES (AESKeySize keySize){
     // We need one round key allocation per round + 1 for the original key that is added before the rounds start.
     this->RoundKeys = new uint8_t[16 * (this->Nr + 1)];
 
+    this->ExpandKey(key);
+
 };
 
 AES::~AES (){
     delete [] this->RoundKeys;
 };
-
-/* 
-    Rcon is a round constant used within the key expansion step.
-
-    The array starts from 01 00 00 00, the value of the first byte is multiplied by 2 in GF(2^8) for each index of the array.
-                                                                                             
-*/
 
 void AES::Cipher (uint8_t state[Nb][Nl]){
 
@@ -96,18 +98,30 @@ void AES::Cipher (uint8_t state[Nb][Nl]){
     this->AddRoundKey(state, 0);
 
     for (roundNumber = 1; roundNumber < this->Nr - 1; roundNumber++){
+        
         this->SubBytes(state);
         this->ShiftRows(state);
+
         this->MixColumns(state);
+
         this->AddRoundKey(state, roundNumber);
     }
 
     this->SubBytes(state);
     this->ShiftRows(state);
+
     this->AddRoundKey(state, roundNumber);
 }
 
-static const uint8_t Rcon [] = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36 };
+/* 
+    Rcon is an array of constants used within the key expansion step.
+
+    The array starts from 01 00 00 00, the value of the first byte is multiplied by 2 in GF(2^8) for each index of the array.
+
+    We push another value at the beginning of the array because indexes have to start from 1.
+                                                                                             
+*/
+static const uint8_t Rcon [] = { 0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36 };
 
 /*
     The key expansion step is required in order to have one unique key for each round.
@@ -124,48 +138,83 @@ void AES::ExpandKey (uint8_t *key){
     // for each word in our needed round keys
     for (uint8_t i = 0; i < Nb * roundKeysNeeded; i++){
 
+#ifdef AES_DEBUG
+        printf("Word %u:\n", i);
+#endif
+
         // First round key is the actual encryption key.
         if (i < this->Nk){
 
             // Copy each word from the 
             memcpy(this->RoundKeys + (i * 4), key + (i * 4), 4);
 
+#ifdef AES_DEBUG
+            display_word(this->RoundKeys + (i * 4), "original key");
+            printf("\n\n");
+#endif
+
             continue;
         }
 
         memcpy(tmp, this->RoundKeys + ((i - 1) * 4), 4);
 
+#ifdef AES_DEBUG
+        display_word(tmp, "tmp");
+#endif
+
         if (i % this->Nk == 0){
 
             this->RotWord(tmp);
+
+#ifdef AES_DEBUG
+            display_word(tmp, "After RotWord()");
+#endif
+
             this->SubWord(tmp);
+
+#ifdef AES_DEBUG   
+            display_word(tmp, "After SubWord()");
+#endif
 
             // we XOR only the first byte cause Rcon constant has 3 null bytes after its most high order byte.
             // Only this high order byte is multiplied by 2 in GF(2^8) for each step of Rcon.
             tmp[0] ^= Rcon[i/this->Nk];
 
+#ifdef AES_DEBUG
+            display_word(tmp, "After XOR Rcon[i]");
+#endif            
+
             this->RoundKeys[(i * 4)]      = tmp[0];
             this->RoundKeys[(i * 4) + 1]  = tmp[1];
             this->RoundKeys[(i * 4) + 2]  = tmp[2];
             this->RoundKeys[(i * 4) + 3]  = tmp[3];
         }
 
-        else if (this->keySize == AESKeySize::AES_256 && i % this->Nk == 4){
+        if (this->keySize == AESKeySize::AES_256 && i % this->Nk == 4){
 
             this->SubWord(tmp);
 
+#ifdef AES_DEBUG   
+            display_word(tmp, "After Subword()");
+#endif
+
             this->RoundKeys[(i * 4)]      = tmp[0];
             this->RoundKeys[(i * 4) + 1]  = tmp[1];
             this->RoundKeys[(i * 4) + 2]  = tmp[2];
             this->RoundKeys[(i * 4) + 3]  = tmp[3];
         }
 
-        memcpy(tmp, this->RoundKeys + ((i - this->Nk) * 4), 4);
+        memcpy(this->RoundKeys + (i * 4), this->RoundKeys + ((i - this->Nk) * 4), 4);
 
         this->RoundKeys[(i * 4)]      ^= tmp[0];
         this->RoundKeys[(i * 4) + 1]  ^= tmp[1];
         this->RoundKeys[(i * 4) + 2]  ^= tmp[2];
         this->RoundKeys[(i * 4) + 3]  ^= tmp[3];
+
+#ifdef AES_DEBUG   
+        display_word(this->RoundKeys + (i * 4), "After XOR w[i-Nk]");
+        printf("\n\n");
+#endif
     }
 }
 
