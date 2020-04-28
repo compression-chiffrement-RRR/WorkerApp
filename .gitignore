@@ -33,3 +33,7 @@
 
 debug/**/*
 release/**/*
+
+.bash_history
+
+.vscode

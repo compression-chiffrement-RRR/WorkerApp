@@ -516,3 +516,17 @@ void AES::InvMixColumns (uint8_t state[Nb][Nl]){
         state[i][3] = this->GMultiply(row1, 11) ^ this->GMultiply(row2, 13) ^ this->GMultiply(row3,  9) ^ this->GMultiply(row4, 14);
     }
 };
+
+int AES::Encrypt(uint8_t *ciphertext, size_t *ciphertextLength, const uint8_t *plaintext, size_t plaintextLength){
+
+    
+
+    return 0;
+}
+
+int AES::Finalize(uint8_t *ciphertext, size_t *ciphertextLength){
+
+
+
+    return 0;
+}

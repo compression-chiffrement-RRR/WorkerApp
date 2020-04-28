@@ -19,7 +19,7 @@ enum AESKeySize {
     AES_256 = 256
 };
 
-// Possible modes for this implementation
+// Possible block cipher modes of operation for this implementation
 enum AESMode { ECB = 0, CBC = 1 };
 
 class AES {
@@ -178,9 +178,9 @@ class AES {
     // void DecryptECB(uint8_t *buffer, uint8_t length, uint8_t *key);
 
 
-    int EncryptUpdate(uint8_t *ciphertext, size_t *ciphertextLength, const uint8_t *plaintext, size_t plaintextLength);
-    int EncryptFinal(uint8_t *ciphertext, size_t *ciphertextLength);
+    int Encrypt(uint8_t *ciphertext, size_t *ciphertextLength, const uint8_t *plaintext, size_t plaintextLength);
+    int Finalize(uint8_t *ciphertext, size_t *ciphertextLength);
 
-    int DecryptUpdate(uint8_t *plaintext, size_t *plaintextLength, const uint8_t *ciphertext, size_t ciphertextLength);
-    int DecryptFinal(uint8_t *plaintext, size_t *plaintextLength);
+    int Encrypt(uint8_t *plaintext, size_t *plaintextLength, const uint8_t *ciphertext, size_t ciphertextLength);
+    int Finalize(uint8_t *plaintext, size_t *plaintextLength);
 };
