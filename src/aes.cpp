@@ -7,11 +7,16 @@
     using namespace std;
     
     #define DEBUG_MSG(msg) { cout << msg << endl; }
+
+    void DisplayWord(uint8_t *word);
+    void DisplayWord(uint8_t *word){
+        for (int i = 0; i < 4; i ++)
+            printf("%02x", *(word + i));
+    }
     
     #define DEBUG_WORD(msg, word) { \
-        cout << msg << ": 0x"; \
-        for (int __i__ = 0; __i__ < 4; __i__ ++) \
-            printf("%02x", *(word + __i__)); \
+        cout << msg << ": 0x";\
+        DisplayWord(word);\
         cout << endl; \
     }
 #else
@@ -175,8 +180,8 @@ void AES::ExpandKey (uint8_t *key){
             this->SubWord(tmp);
             DEBUG_WORD("After SubWord()", tmp);
 
-            // we XOR only the first byte cause Rcon constant has 3 null bytes after its highest order byte.
-            // Only this high order byte is multiplied by 2 in GF(2^8) for each step of Rcon.
+            // we XOR only the first byte of our word because Rcon constant has 3 null bytes after its highest order byte (and a ^ 0 = a).
+            // Only this highest order byte is multiplied by 2 in GF(2^8) for each step of Rcon.
             tmp[0] ^= Rcon[i/this->Nk];
             DEBUG_WORD("After XOR Rcon[i]", tmp);
 
@@ -198,13 +203,14 @@ void AES::ExpandKey (uint8_t *key){
         }
 
         memcpy(this->RoundKeys + (i * 4), this->RoundKeys + ((i - this->Nk) * 4), 4);
+        DEBUG_WORD("w[i - Nk]", this->RoundKeys + (i * 4));
 
         this->RoundKeys[(i * 4)]      ^= tmp[0];
         this->RoundKeys[(i * 4) + 1]  ^= tmp[1];
         this->RoundKeys[(i * 4) + 2]  ^= tmp[2];
         this->RoundKeys[(i * 4) + 3]  ^= tmp[3];
 
-        DEBUG_WORD("After XOR w[i-Nk]", tmp);
+        DEBUG_WORD("After XOR w[i-Nk]", this->RoundKeys + (i * 4));
 
     }
 };
