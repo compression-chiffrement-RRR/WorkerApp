@@ -13,6 +13,7 @@ int main (){
     };*/
 
     // expansion key test
+
     
     uint8_t key128 [] = { 
         0x2b, 0x7e, 0x15, 0x16,
@@ -20,7 +21,6 @@ int main (){
         0xab, 0xf7, 0x15, 0x88, 
         0x09, 0xcf, 0x4f, 0x3c 
     };
-    AES aes128 = AES(key128, AESKeySize::AES_128);
 
     uint8_t key192 [] = { 
         0x8e, 0x73, 0xb0, 0xf7, 
@@ -30,7 +30,6 @@ int main (){
         0x62, 0xf8, 0xea, 0xd2, 
         0x52, 0x2c, 0x6b, 0x7b 
     };
-    AES aes192 = AES(key192, AESKeySize::AES_192);
 
     uint8_t key256 [] = { 
         0x60, 0x3d, 0xeb, 0x10, 
@@ -43,7 +42,9 @@ int main (){
         0x09, 0x14, 0xdf, 0xf4 
     };
 
-    AES aes256 = AES(key256, AESKeySize::AES_256);
+    AES aes128 = AES(AESKeySize::AES_128, AESMode::ECB, key128);
+    AES aes192 = AES(AESKeySize::AES_192, AESMode::ECB, key192);
+    AES aes256 = AES(AESKeySize::AES_256, AESMode::ECB, key256);
 
     return 0;
 }

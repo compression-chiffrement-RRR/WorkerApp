@@ -7,12 +7,6 @@
 
 #include <stdint.h>
 
-#define AES_DEBUG 1
-
-#ifdef AES_DEBUG
-void DisplayWord (uint8_t *word, const char *debug);
-#endif
-
 // number of columns in one block.
 #define Nb 4
 // number of lines in one block (not actually part of the specification).
@@ -25,12 +19,20 @@ enum AESKeySize {
     AES_256 = 256
 };
 
+// Possible modes for this implementation
+enum AESMode { ECB = 0, CBC = 1 };
+
 class AES {
     
     private:
 
-    // the chosen key size/
+    // The chosen key size/
     AESKeySize keySize;
+    // The chosen block cipher mode of operation.
+    AESMode mode;
+
+    /* The IV to use for some encryption modes like CBC, otherwise NULL. */
+    uint8_t *iv;
 
     /* 
         Nk represents the number of words (4 bytes) in the input encryption key.
@@ -62,6 +64,13 @@ class AES {
 
     uint8_t *RoundKeys;
 
+    // Main initializer for all constructors
+    void Init(AESKeySize keySize, AESMode mode, uint8_t *key);
+
+    // The main block encryption method.
+    void Cipher(uint8_t state[Nb][Nl]);
+    void InvCipher(uint8_t state[Nb][Nl]);
+
     // Key expansion step, in order to produces keys for each round from the main one.
     void ExpandKey (uint8_t *key);
 
@@ -92,13 +101,16 @@ class AES {
     
     public:
 
-    // The main block encryption method.
-    void Cipher(uint8_t state[Nb][Nl]);
+    // The AES constructors.
 
-    // The AES constructor.
-    // First parameter is the key.
-    // Second parameter is the key size.
-    AES(uint8_t *key, AESKeySize keySize);
+    // The "keySize" parameter is a choice between the three AES key sizes.
+    // The "mode" parameter is the block cipher mode of operation to use (see AESMode enum for all modes available).
+    // The "key" parameter is the key to use for this instance of AES. Must not be NULL and must point to a buffer with a size in bits >= "keySize".
+    // The "iv" parameter is the initialization vector (IV) to use for modes such as CBC. It can be NULL if the "mode" parameter indicates a mode of operation that does not require the use of an IV
+    AES(AESKeySize keySize, AESMode mode, uint8_t *key, uint8_t *iv);
+    
+    // This constructor does not have the "iv" parameter, it could be used for modes that don't require the use of an IV.
+    AES(AESKeySize keySize, AESMode mode, uint8_t *key);
     ~AES();
 
     /* 
@@ -142,7 +154,7 @@ class AES {
 
     */
 
-    void EncryptCBC(uint8_t *buffer, uint8_t length, uint8_t *key, uint8_t *iv);
+    // void EncryptCBC(uint8_t *buffer, uint8_t length, uint8_t *key, uint8_t *iv);
 
     /* 
         Decrypts a blob of data using AES in Cipher Block Chaining (CBC) mode of operation.
@@ -160,9 +172,15 @@ class AES {
 
     */
 
-    void DecryptCBC(uint8_t *buffer, uint8_t length, uint8_t *key, uint8_t *iv);
+    // void DecryptCBC(uint8_t *buffer, uint8_t length, uint8_t *key, uint8_t *iv);
    
-    // These two methods must not be used. ECB mode was implemented for testing purposes since it doesn't involve any changes to the Rijndael algorithm's output for each block (it simply concatenate the ciphertext blocks).
-    void EncryptECB(uint8_t *buffer, uint8_t length, uint8_t *key);
-    void DecryptECB(uint8_t *buffer, uint8_t length, uint8_t *key);
+    // void EncryptECB(uint8_t *buffer, uint8_t length, uint8_t *key);
+    // void DecryptECB(uint8_t *buffer, uint8_t length, uint8_t *key);
+
+
+    int EncryptUpdate(uint8_t *ciphertext, size_t *ciphertextLength, const uint8_t *plaintext, size_t plaintextLength);
+    int EncryptFinal(uint8_t *ciphertext, size_t *ciphertextLength);
+
+    int DecryptUpdate(uint8_t *plaintext, size_t *plaintextLength, const uint8_t *ciphertext, size_t ciphertextLength);
+    int DecryptFinal(uint8_t *plaintext, size_t *plaintextLength);
 };

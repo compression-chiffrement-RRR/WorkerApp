@@ -3,12 +3,22 @@
 #include "aes.h"
 
 #ifdef AES_DEBUG
-
-#include <iostream>
-using namespace std;
-
+    #include <iostream>
+    using namespace std;
+    
+    #define DEBUG_MSG(msg) { cout << msg << endl; }
+    
+    #define DEBUG_WORD(msg, word) { \
+        cout << msg << ": 0x"; \
+        for (int __i__ = 0; __i__ < 4; __i__ ++) \
+            printf("%02x", *(word + __i__)); \
+        cout << endl; \
+    }
+    //#define DEBUG_WORD(word, debug) printf("%s: 0x%02x%02x%02x%02x\n", debug, *(word), *(word + 1), *(word + 2), *(word + 3))
+#else
+    #define DEBUG_MSG(msg)
+    #define DEBUG_WORD(word, debug)
 #endif
-
 
 /*
     Rijndael cipher S-box substitution table.
@@ -52,10 +62,11 @@ static const uint8_t RSBox[256] = {
     0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d 
 };
 
-AES::AES (uint8_t *key, AESKeySize keySize){
+void AES::Init(AESKeySize keySize, AESMode mode, uint8_t *key){
 
     this->keySize = keySize;
-
+    this->mode = mode;
+    
     // Define Nr and Nk according to the key size.
     switch (keySize){
         
@@ -63,10 +74,12 @@ AES::AES (uint8_t *key, AESKeySize keySize){
             this->Nk = 4;
             this->Nr = 10;
             break;
+
         case AESKeySize::AES_192:
             this->Nk = 6;
             this->Nr = 12;
             break;
+
         case AESKeySize::AES_256:
             this->Nk = 8;
             this->Nr = 14;
@@ -78,7 +91,15 @@ AES::AES (uint8_t *key, AESKeySize keySize){
     this->RoundKeys = new uint8_t[16 * (this->Nr + 1)];
 
     this->ExpandKey(key);
+};
 
+AES::AES (AESKeySize keySize, AESMode mode, uint8_t *key){
+    this->Init(keySize, mode, key);
+};
+
+AES::AES (AESKeySize keySize, AESMode mode, uint8_t *key, uint8_t *iv){
+    this->Init(keySize, mode, key);
+    this->iv = iv;
 };
 
 AES::~AES (){
@@ -105,14 +126,14 @@ void AES::Cipher (uint8_t state[Nb][Nl]){
     this->ShiftRows(state);
 
     this->AddRoundKey(state, roundNumber);
-}
+};
 
 /* 
     Rcon is an array of constants used within the key expansion step.
 
     The array starts from 01 00 00 00, the value of the first byte is multiplied by 2 in GF(2^8) for each index of the array.
 
-    We push another value at the beginning of the array because indexes have to start from 1.
+    We push one more value at the beginning of the array because indexes have to start from 1.
                                                                                              
 */
 static const uint8_t Rcon [] = { 0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36 };
@@ -125,62 +146,40 @@ static const uint8_t Rcon [] = { 0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40,
 
 void AES::ExpandKey (uint8_t *key){
     
-    // number of round keys that we need.
-    uint8_t roundKeysNeeded = (this->Nr + 1);
     uint8_t tmp[4];
 
-#ifdef AES_DEBUG
-        printf("ExpandKey (with %u bits key)\n\n", this->keySize);
-#endif
+    DEBUG_MSG("ExpandKey (with " << +this->keySize << " bits key)");
 
     // for each word in our needed round keys
-    for (uint8_t i = 0; i < Nb * roundKeysNeeded; i++){
+    for (uint8_t i = 0; i < Nb * (this->Nr + 1); i++){
 
-#ifdef AES_DEBUG
-        printf("Word %u:\n", i);
-#endif
+        DEBUG_MSG("i: " << +i);
 
         // First round key is the actual encryption key.
         if (i < this->Nk){
 
             // Copy each word from the 
             memcpy(this->RoundKeys + (i * 4), key + (i * 4), 4);
-
-#ifdef AES_DEBUG
-            DisplayWord(this->RoundKeys + (i * 4), "original key");
-            printf("\n\n");
-#endif
+            DEBUG_WORD("original key", this->RoundKeys + (i * 4));
 
             continue;
         }
 
         memcpy(tmp, this->RoundKeys + ((i - 1) * 4), 4);
-
-#ifdef AES_DEBUG
-        DisplayWord(tmp, "tmp");
-#endif
+        DEBUG_WORD("w[i-1]", tmp);
 
         if (i % this->Nk == 0){
 
             this->RotWord(tmp);
-
-#ifdef AES_DEBUG
-            DisplayWord(tmp, "After RotWord()");
-#endif
+            DEBUG_WORD("After RotWord()", tmp);
 
             this->SubWord(tmp);
-
-#ifdef AES_DEBUG   
-            DisplayWord(tmp, "After SubWord()");
-#endif
+            DEBUG_WORD("After SubWord()", tmp);
 
             // we XOR only the first byte cause Rcon constant has 3 null bytes after its highest order byte.
             // Only this high order byte is multiplied by 2 in GF(2^8) for each step of Rcon.
             tmp[0] ^= Rcon[i/this->Nk];
-
-#ifdef AES_DEBUG
-            DisplayWord(tmp, "After XOR Rcon[i]");
-#endif            
+            DEBUG_WORD("After XOR Rcon[i]", tmp);
 
             this->RoundKeys[(i * 4)]      = tmp[0];
             this->RoundKeys[(i * 4) + 1]  = tmp[1];
@@ -191,10 +190,7 @@ void AES::ExpandKey (uint8_t *key){
         if (this->keySize == AESKeySize::AES_256 && i % this->Nk == 4){
 
             this->SubWord(tmp);
-
-#ifdef AES_DEBUG   
-            DisplayWord(tmp, "After Subword()");
-#endif
+            DEBUG_WORD("After Subword()", tmp);
 
             this->RoundKeys[(i * 4)]      = tmp[0];
             this->RoundKeys[(i * 4) + 1]  = tmp[1];
@@ -209,18 +205,10 @@ void AES::ExpandKey (uint8_t *key){
         this->RoundKeys[(i * 4) + 2]  ^= tmp[2];
         this->RoundKeys[(i * 4) + 3]  ^= tmp[3];
 
-#ifdef AES_DEBUG   
-        DisplayWord(this->RoundKeys + (i * 4), "After XOR w[i-Nk]");
-        printf("\n\n");
-#endif
-    }
-}
+        DEBUG_WORD("After XOR w[i-Nk]", tmp);
 
-#ifdef AES_DEBUG
-void DisplayWord (uint8_t *word, const char *debug){
-    printf("%s: 0x%02x%02x%02x%02x\n", debug, word[0], word[1], word[2], word[3]);
-}
-#endif
+    }
+};
 
 // Apply S-Box substitution to a single word (4 bytes), to be used inside the ExpandKey method.
 void AES::SubWord (uint8_t *word){
@@ -228,7 +216,7 @@ void AES::SubWord (uint8_t *word){
     for (uint8_t i = 0; i < Nb; i++){
         word[i] = SBox[word[i]];
     }
-}
+};
 
 // Simple circular rotation to the left of each byte in a word.
 void AES::RotWord(uint8_t *word){
@@ -239,19 +227,17 @@ void AES::RotWord(uint8_t *word){
     word[1] = word[2];
     word[2] = word[3];
     word[3] = tmp;
-}
+};
 
 /* The AddRoundKey step is a simple XOR operation between the state and the corresponding part of the RoundKey for the current round. */
 void AES::AddRoundKey (uint8_t state[Nb][Nl], uint8_t roundNumber){
 
     for (uint8_t i = 0; i < Nb; i++){
-
         for (uint8_t y = 0; y < Nl; y++){
-
             state[i][y] ^= this->RoundKeys[(roundNumber * Nb * Nl) + (i * Nb) + y];
         }
     }
-}
+};
 
 
 /* 
@@ -329,7 +315,7 @@ void AES::ShiftRows (uint8_t state[Nb][Nl]){
     state[3][3] = state[2][3];
     state[2][3] = state[1][3];
     state[1][3] = tmp;
-}
+};
 
 /* To invert the ShiftRows step, we invert the rotations (so we right-shift instead of left-shift). */
 void AES::InvShiftRows (uint8_t state[Nb][Nl]){
@@ -358,14 +344,14 @@ void AES::InvShiftRows (uint8_t state[Nb][Nl]){
     state[1][3] = state[2][3];
     state[2][3] = state[3][3];
     state[3][3] = tmp;
-}
+};
 
 /* 
     Multiplication by X in the Galois field GF(2^8), i.e multiply by 2. 
 
-    This is done by left shifting (each monomial is multiplied by X, so for e.g 1 becomes X, X becomes X^2 ,X^2 becomes X^3...etc) in the first place.
+    This is done by left shifting (each monomial is multiplied by X, so for e.g 1 becomes X, X becomes X^2 ,X^2 becomes X^3...etc).
 
-    Then we  need to reduce the result if the input number had the most significant bit set, otherwise we go out of the field by having an X^7 monomial transformed to X^8.
+    Then we might have to reduce the resulting polynomial if the input number had its most significant bit set to 1, otherwise we would go out of the field by having an X^7 monomial transformed to X^8.
 
     The reduction could be done by applying the modulo operation to the result with any irreducible polynomial of a highest degree of 8 (with a X^8 monomial as the highest).
     
@@ -474,8 +460,6 @@ uint8_t AES::GMultiply (uint8_t number, uint8_t multiplier){
     out3  out7  out11 out15      3 1 1 2     in3  in7  in11 in15
 
     (fixed matrix values are in decimal)
-
-    See more at: https://en.wikipedia.org/wiki/Rijndael_MixColumns
 
 */
 

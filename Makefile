@@ -16,7 +16,7 @@ EXE  = workerapp
 #
 DBGDIR = debug
 DBGEXE = $(DBGDIR)/$(EXE)
-DBGCFLAGS = -g -O0 -DDEBUG
+DBGCFLAGS = -g -O0 -DDEBUG -DAES_DEBUG
 
 #
 # Release build settings
