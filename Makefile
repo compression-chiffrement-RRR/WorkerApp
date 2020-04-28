@@ -33,7 +33,7 @@ all: prepare release
 #
 # Debug
 #
-debug: $(DBGEXE)
+debug: prepare $(DBGEXE)
 
 $(DBGEXE): $(SRCS)
 	$(CC) $(CFLAGS) $(DBGCFLAGS) -o $(DBGEXE) $^
@@ -41,7 +41,7 @@ $(DBGEXE): $(SRCS)
 #
 # Release
 #
-release: $(RELEXE)
+release: prepare $(RELEXE)
 
 $(RELEXE): $(SRCS)
 	$(CC) $(CFLAGS) $(RELCFLAGS) -o $(RELEXE) $^
