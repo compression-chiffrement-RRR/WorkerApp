@@ -5,17 +5,16 @@ using namespace std;
 
 int main (){
 
-    /*uint8_t bytes [] = {
+    uint8_t bytes [] = {
         0x32, 0x43, 0xf6, 0xa8,
         0x88, 0x5a, 0x30, 0x8d,
         0x31, 0x31, 0x98, 0xa2,
         0xe0, 0x37, 0x07, 0x34
-    };*/
+    };
 
     // expansion key test
-
     
-    /*uint8_t key128 [] = { 
+    uint8_t key128 [] = { 
         0x2b, 0x7e, 0x15, 0x16,
         0x28, 0xae, 0xd2, 0xa6, 
         0xab, 0xf7, 0x15, 0x88, 
@@ -29,7 +28,7 @@ int main (){
         0x80, 0x90, 0x79, 0xe5, 
         0x62, 0xf8, 0xea, 0xd2, 
         0x52, 0x2c, 0x6b, 0x7b 
-    };*/
+    };
 
     uint8_t key256 [] = { 
         0x60, 0x3d, 0xeb, 0x10, 
@@ -42,9 +41,30 @@ int main (){
         0x09, 0x14, 0xdf, 0xf4 
     };
 
-    //AES aes128 = AES(AESKeySize::AES_128, AESMode::ECB, key128);
-    //AES aes192 = AES(AESKeySize::AES_192, AESMode::ECB, key192);
-    AES aes256 = AES(AESKeySize::AES_256, AESMode::ECB, key256);
+    uint8_t iv [] = {
+        0x00, 0x01, 0x02, 0x03,
+        0x04, 0x05, 0x06, 0x07,
+        0x00, 0x01, 0x02, 0x03,
+        0x04, 0x05, 0x06, 0x07
+    };
+
+    AES aes128 = AES(AESKeySize::AES_128, AESMode::CBC, key128, iv);
+    AES aes192 = AES(AESKeySize::AES_192, AESMode::CBC, key192, iv);
+    AES aes256 = AES(AESKeySize::AES_256, AESMode::CBC, key256, iv);
+
+    aes128.Encrypt(bytes, 16);
+
+    for (int i = 0; i < 16; i ++)
+        printf("%02x ", bytes[i]);
+    printf("\n");
+
+    aes128.SetIv(iv);
+
+    aes128.Decrypt(bytes, 16);
+
+    for (int i = 0; i < 16; i ++)
+        printf("%02x ", bytes[i]);
+    printf("\n");
 
     return 0;
 }

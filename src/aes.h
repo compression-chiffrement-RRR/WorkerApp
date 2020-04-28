@@ -12,6 +12,9 @@
 // number of lines in one block (not actually part of the specification).
 #define Nl 4
 
+// AES block size in bytes
+#define AES_BLOCK_SIZE 16
+
 // Possible key sizes for the AES constructor.
 enum AESKeySize {
     AES_128 = 128,
@@ -23,16 +26,88 @@ enum AESKeySize {
 enum AESMode { ECB = 0, CBC = 1 };
 
 class AES {
+
+    public:
+
+    // The AES constructors.
+
+    // The "keySize" parameter is a choice between the three AES key sizes.
+    // The "mode" parameter is the block cipher mode of operation to use (see AESMode enum for all modes available).
+    // The "key" parameter is the key to use for this instance of AES. Must not be NULL and must point to a buffer with a size in bits >= "keySize".
+    // The "iv" parameter is the initialization vector (IV) to use for modes such as CBC. It can be NULL if the "mode" parameter indicates a mode of operation that does not require the use of an IV
+    AES(AESKeySize keySize, AESMode mode, uint8_t *key, uint8_t *iv);
+    
+    // This constructor does not have the "iv" parameter, it could be used for modes that don't require the use of an IV.
+    AES(AESKeySize keySize, AESMode mode, uint8_t *key);
+    ~AES();
+
+    /* 
+        Encrypts a blob of data using AES.
+        
+        The "buffer" parameter is a pointer to the buffer which is to be encrypted. 
+        Its content will be overwritten with the resulting encrypted buffer.
+        
+        PKCS#7 padding is REQUIRED. Which means you need to pad your buffer with N bytes with the value of N, where N is the length of the buffer in bytes modulo the AES cipher block size (16).
+        
+        Check these examples for better understanding:
+
+        If you have a 13 byte buffer (which is NOT a multiple of th AES block size, i.e 16 bytes), you need to pad with 3 more bytes:
+
+        00 01 02 03 04 05 06 07 08 09 0A 0B 0C = 13 bytes
+        -------------- original data ---------
+
+        becomes...
+
+        00   01   02   03   04   05   06   07   08   09   0A   0B   0C   03     03    03 = 16 bytes
+        ------------------------- original data ----------------------   --- padding ---
+        
+        If you have a 16 bytes buffer (which is EXACTLY a multiple of the AES block size, i.e 16 bytes), you need to pad with a whole new block:
+        
+        00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0F 10 = 16 bytes
+        -------------- original data ------------------
+
+        becomes...
+
+        00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0F 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10  = 32 bytes
+        -------------- original data ------------------ ----------------- padding ---------------------
+
+        
+        The "length" parameter is the size in bytes of the data within "buffer" to be encrypted. 
+        Of course, according to the buffer "parameter" constraints, it must be a multiple of the block size in AES (which means "length" % 16 == 0 ).
+
+        returns 0 on success, or -1 if the buffer was NULL or if length % 16 != 0.
+
+    */
+
+    int Encrypt(uint8_t *plaintext, size_t length);
+
+    /* 
+        Decrypts a blob of data using AES.
+
+        The "buffer" parameter is a pointer to the buffer which is to be decrypted. 
+        Its content will be overwritten with the resulting decrypted buffer (padding won't be stripped).
+
+        The "length" parameter is the length of "buffer", in bytes. 
+        It needs to be a multiple of the AES cipher block size (which means "length" % 16 == 0).
+
+        returns 0 on success, or -1 if the buffer was NULL or if length % 16 != 0.
+    */
+
+    int Decrypt(uint8_t *ciphertext, size_t length);
+
+    // Manually reset the IV when you want to use the same instance of AES for encrypting, then decrypting.
+    void SetIv(uint8_t *iv);
     
     private:
 
     // The chosen key size/
     AESKeySize keySize;
+    
     // The chosen block cipher mode of operation.
     AESMode mode;
 
-    /* The IV to use for some encryption modes like CBC, otherwise NULL. */
-    uint8_t *iv;
+    // The chosen IV for some encryption modes like CBC, otherwise NULL. 
+    uint8_t iv[AES_BLOCK_SIZE] = { 0 };
 
     /* 
         Nk represents the number of words (4 bytes) in the input encryption key.
@@ -60,9 +135,8 @@ class AES {
 
     uint8_t Nr; 
 
-    /* The buffer that holds the generated round keys from the key expansion step. */
-
-    uint8_t *RoundKeys;
+    /* The buffer that holds the generated round keys from the key expansion step. Will be dynamically allocated according to the key size. */
+    uint8_t *RoundKeys = NULL;
 
     // Main initializer for all constructors
     void Init(AESKeySize keySize, AESMode mode, uint8_t *key);
@@ -98,89 +172,14 @@ class AES {
 
     // This method allows us to multiply any byte by another number (up to 15) in the galois field G(2^8)
     uint8_t GMultiply (uint8_t number, uint8_t multiplier); 
+
+    // XOR current IV to a block.
+    void AddIv(uint8_t *block);
+
+    // encryption/decryption for different modes, internally called by AES::Encrypt/AES::Decrypt.
+    void EncryptECB(uint8_t *plaintext, size_t length);
+    void DecryptECB(uint8_t *ciphertext, size_t length);
+    void EncryptCBC(uint8_t *plaintext, size_t length);
+    void DecryptCBC(uint8_t *ciphertext, size_t length);
     
-    public:
-
-    // The AES constructors.
-
-    // The "keySize" parameter is a choice between the three AES key sizes.
-    // The "mode" parameter is the block cipher mode of operation to use (see AESMode enum for all modes available).
-    // The "key" parameter is the key to use for this instance of AES. Must not be NULL and must point to a buffer with a size in bits >= "keySize".
-    // The "iv" parameter is the initialization vector (IV) to use for modes such as CBC. It can be NULL if the "mode" parameter indicates a mode of operation that does not require the use of an IV
-    AES(AESKeySize keySize, AESMode mode, uint8_t *key, uint8_t *iv);
-    
-    // This constructor does not have the "iv" parameter, it could be used for modes that don't require the use of an IV.
-    AES(AESKeySize keySize, AESMode mode, uint8_t *key);
-    ~AES();
-
-    /* 
-        Encrypts a blob of data using AES in Cipher Block Chaining (CBC) mode of operation.
-        
-        The "buffer" parameter is a pointer to the buffer which is to be encrypted. 
-        Its content will be overwritten with the resulting encrypted buffer.
-        
-        PKCS#7 padding is REQUIRED. Which means you need to pad your buffer with N bytes with the value of N, where N is the length of the buffer in bytes modulo the AES cipher block size (16).
-        
-        Check these examples for better understanding:
-
-        If you have a 13 byte buffer (which is NOT a multiple of th AES block size, i.e 16 bytes), you need to pad with 3 more bytes:
-
-        00 01 02 03 04 05 06 07 08 09 0A 0B 0C = 13 bytes
-        -------------- original data ---------
-
-        becomes...
-
-        00   01   02   03   04   05   06   07   08   09   0A   0B   0C   03     03    03 = 16 bytes
-        ------------------------- original data ----------------------   --- padding ---
-        
-        If you have a 16 bytes buffer (which is EXACTLY a multiple of the AES block size, i.e 16 bytes), you need to pad with a whole new block:
-        
-        00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0F 10 = 16 bytes
-        -------------- original data ------------------
-
-        becomes...
-
-        00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0F 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10  = 32 bytes
-        -------------- original data ------------------ ----------------- padding ---------------------
-
-        
-        The "length" parameter is the size in bytes of the data within "buffer" to be encrypted. 
-        Of course, according to the buffer "parameter" constraints, it must be a multiple of the block size in AES (128 bits).
-
-        The "key" parameter is the encryption key to use. It must be the same size as the request key type when the AES instance was created (128, 192 or 256).
-
-        The "iv" parameter is the initialization vector for the CBC mode, it must be an unpredictable value but is not to be kept secret after the encryption process.
-        It must have the same size as the AES block size, which is 16 bytes (128 bits).
-
-    */
-
-    // void EncryptCBC(uint8_t *buffer, uint8_t length, uint8_t *key, uint8_t *iv);
-
-    /* 
-        Decrypts a blob of data using AES in Cipher Block Chaining (CBC) mode of operation.
-
-        The "buffer" parameter is a pointer to the buffer which is to be decrypted. 
-        Its content will be overwritten with the resulting decrypted buffer (padding won't be stripped).
-
-        The "length" parameter is the length of "buffer", in bytes. 
-        It needs to be a multiple of the AES cipher block size (16 bytes).
-
-        The "key" parameter is a the key that was used for encryption. It must be the same size as the request key type when the AES instance was created (128, 192 or 256).
-
-        The "iv" parameter is the initialization vector that was used for the CBC mode.
-        It must have the same size as the AES block size, which is 16 bytes (128 bits).
-
-    */
-
-    // void DecryptCBC(uint8_t *buffer, uint8_t length, uint8_t *key, uint8_t *iv);
-   
-    // void EncryptECB(uint8_t *buffer, uint8_t length, uint8_t *key);
-    // void DecryptECB(uint8_t *buffer, uint8_t length, uint8_t *key);
-
-
-    int Encrypt(uint8_t *ciphertext, size_t *ciphertextLength, const uint8_t *plaintext, size_t plaintextLength);
-    int Finalize(uint8_t *ciphertext, size_t *ciphertextLength);
-
-    int Encrypt(uint8_t *plaintext, size_t *plaintextLength, const uint8_t *ciphertext, size_t ciphertextLength);
-    int Finalize(uint8_t *plaintext, size_t *plaintextLength);
 };
