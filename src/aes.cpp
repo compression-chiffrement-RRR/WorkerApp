@@ -14,7 +14,6 @@
             printf("%02x", *(word + __i__)); \
         cout << endl; \
     }
-    //#define DEBUG_WORD(word, debug) printf("%s: 0x%02x%02x%02x%02x\n", debug, *(word), *(word + 1), *(word + 2), *(word + 3))
 #else
     #define DEBUG_MSG(msg)
     #define DEBUG_WORD(word, debug)
