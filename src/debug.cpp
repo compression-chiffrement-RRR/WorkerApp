@@ -29,7 +29,7 @@ void DisplayBuffer(uint8_t *block, size_t length){
     for (size_t i = 0; i < length; i ++){
         if (i != 0 && i % 16  == 0)
             cout << endl;
-        printf("%02x ", block[i]);
+        printf("0x%02x ", block[i]);
     }
     cout << endl;
 };

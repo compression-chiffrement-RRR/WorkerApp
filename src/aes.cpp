@@ -159,8 +159,6 @@ void AES::EncryptCBC(uint8_t *plaintext, size_t length){
         // Apply current to IV to current plaintext block.
         this->AddIv(plaintext + i);
 
-        DEBUG_BUFFER("Iv", this->iv, AES_BLOCK_SIZE);
-
         // Cipher block
         AES::Cipher((uint8_t (*)[Nl])(plaintext + i));
 
@@ -172,12 +170,12 @@ void AES::EncryptCBC(uint8_t *plaintext, size_t length){
 
 void AES::DecryptCBC(uint8_t *ciphertext, size_t length){
     
-    uint8_t tmpIv [AES_BLOCK_SIZE];
+    uint8_t tmp [AES_BLOCK_SIZE];
 
     for (size_t i = 0; i < length; i += AES_BLOCK_SIZE){
 
         // Copy current ciphertext block to temp buffer as we will use for the next one.
-        memcpy(tmpIv, ciphertext + i, AES_BLOCK_SIZE);
+        memcpy(tmp, ciphertext + i, AES_BLOCK_SIZE);
 
         // Decipher block
         AES::InvCipher((uint8_t (*)[Nl])(ciphertext + i));
@@ -187,7 +185,7 @@ void AES::DecryptCBC(uint8_t *ciphertext, size_t length){
         this->AddIv(plaintext);
 
         // Copy current ciphertext block to next iv.
-        memcpy(this->iv, tmpIv, AES_BLOCK_SIZE);
+        this->SetIv(tmp);
     }
 };
 
