@@ -1,7 +1,7 @@
 # WorkerApp
 Encryption/Compression worker client for Ciphernet app.
 ### Build and run
-Build the docker image by running this command:
+* Build the docker image by running this command:
 ```
 docker build -t ciphernet_worker_app <PATH_TO_REPOSITORY>
 ```
