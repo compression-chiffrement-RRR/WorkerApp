@@ -7,7 +7,7 @@ docker build -t ciphernet_worker_app <PATH_TO_REPOSITORY>
 ```
 * To build the executables within the container:
 ```
-docker run -it ciphernet_worker_app
+docker run -it -v <PATH_TO_REPOSITORY>:/root ciphernet_worker_app
 make all
 ```
 * To start tests
