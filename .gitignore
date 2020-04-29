@@ -33,6 +33,7 @@
 
 debug/**/*
 release/**/*
+tests/bin/**/*
 
 .bash_history
 
