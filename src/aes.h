@@ -176,9 +176,11 @@ class AES {
     // XOR current IV to a block.
     void AddIv(uint8_t *block);
 
-    // encryption/decryption for different modes, internally called by AES::Encrypt/AES::Decrypt.
+    // encryption/decryption for each mode of operation, internally called by AES::Encrypt/AES::Decrypt.
+
     void EncryptECB(uint8_t *plaintext, size_t length);
     void DecryptECB(uint8_t *ciphertext, size_t length);
+
     void EncryptCBC(uint8_t *plaintext, size_t length);
     void DecryptCBC(uint8_t *ciphertext, size_t length);
     

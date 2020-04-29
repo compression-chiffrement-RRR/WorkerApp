@@ -1,51 +1,12 @@
 #include <cstring>
+#include <stdio.h>
+#include <stdint.h>
 
 #include "aes.h"
 
-#ifdef AES_DEBUG
-    #include <iostream>
-    using namespace std;
-    
-    #define DEBUG_MSG(msg) { cout << msg << endl; }
+#include "debug.h"
 
-    void DisplayWord(uint8_t *word);
-    void DisplayState(uint8_t state[Nb][Nl]);
-
-    void DisplayWord(uint8_t *word){
-        for (int i = 0; i < 4; i ++)
-            printf("%02x", word[i]);
-    }
-
-
-    void DisplayState(uint8_t state[Nb][Nl]){
-        for (int i = 0; i < 4; i ++){
-            cout << endl;
-            for (int y = 0; y < 4; y ++){
-                printf("%02x ", state[y][i]);
-            }
-        }
-    }
-    
-    #define DEBUG_WORD(msg, word) { \
-        cout << msg << ": 0x";\
-        DisplayWord(word);\
-        cout << endl; \
-    }
-
-    #define DEBUG_STATE(msg, state) { \
-        cout << msg << ": ";\
-        DisplayState(state);\
-        cout << endl; \
-    }
-#else
-    #define DEBUG_MSG(msg)
-    #define DEBUG_WORD(word, debug)
-    #define DEBUG_STATE(msg, word)
-#endif
-
-/*
-    Rijndael cipher S-box substitution table.
-*/
+/* Rijndael cipher S-box substitution table. */
 static const uint8_t SBox[256] = {
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76, 
     0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0, 
@@ -129,18 +90,21 @@ AES::~AES (){
     delete [] this->RoundKeys;
 };
 
+/* Encrypt/Decrypt methods are actually wrappers that call encryption/decryption for the AES instance's mode of operation. */
 int AES::Encrypt(uint8_t *plaintext, size_t length){
 
     if (plaintext == NULL || length % AES_BLOCK_SIZE != 0)
         return -1;
 
     switch (this->mode){
+        
         case AESMode::ECB:
-        this->EncryptECB(plaintext, length);
-        break;
+            this->EncryptECB(plaintext, length);
+            break;
+
         case AESMode::CBC:
-        this->EncryptCBC(plaintext, length);
-        break;
+            this->EncryptCBC(plaintext, length);
+            break;
     }
 
     return 0;
@@ -168,19 +132,20 @@ int AES::Decrypt(uint8_t *ciphertext, size_t length){
 void AES::EncryptECB(uint8_t *plaintext, size_t length){
     
     for (size_t i = 0; i < length; i += AES_BLOCK_SIZE)
-        AES::Cipher((uint8_t (*)[Nl])plaintext + (i * AES_BLOCK_SIZE));
+        AES::Cipher((uint8_t (*)[Nl])(plaintext + i));
 }
 
 void AES::DecryptECB(uint8_t *ciphertext, size_t length){
     
     for (size_t i = 0; i < length; i += AES_BLOCK_SIZE)
-        AES::InvCipher((uint8_t (*)[Nl])ciphertext + (i * AES_BLOCK_SIZE));
+        AES::InvCipher((uint8_t (*)[Nl])(ciphertext + i));
 };
 
+// Xor a block with the initial IV or the last encrypted block that was copied to this->iv.
 void AES::AddIv(uint8_t *block){
-    for (size_t i = 0; i < AES_BLOCK_SIZE; i ++){
+    
+    for (size_t i = 0; i < AES_BLOCK_SIZE; i ++)
         block[i] ^= this->iv[i];
-    }
 };
 
 void AES::SetIv(uint8_t *iv){
@@ -190,16 +155,18 @@ void AES::SetIv(uint8_t *iv){
 void AES::EncryptCBC(uint8_t *plaintext, size_t length){
 
     for (size_t i = 0; i < length; i += AES_BLOCK_SIZE){
-        
+
         // Apply current to IV to current plaintext block.
-        this->AddIv(plaintext + (i * AES_BLOCK_SIZE));
+        this->AddIv(plaintext + i);
+
+        DEBUG_BUFFER("Iv", this->iv, AES_BLOCK_SIZE);
 
         // Cipher block
-        AES::Cipher((uint8_t (*)[Nl])plaintext + (i * AES_BLOCK_SIZE));
+        AES::Cipher((uint8_t (*)[Nl])(plaintext + i));
 
         // Copy our ciphered block as our next IV.
-        uint8_t *ciphertext = plaintext + (i * AES_BLOCK_SIZE);
-        memcpy(this->iv, ciphertext, AES_BLOCK_SIZE);
+        uint8_t *ciphertext = plaintext + i;
+        this->SetIv(ciphertext);
     }
 };
 
@@ -209,15 +176,17 @@ void AES::DecryptCBC(uint8_t *ciphertext, size_t length){
 
     for (size_t i = 0; i < length; i += AES_BLOCK_SIZE){
 
-        // Copy current ciphertext block as we will use for the next one.
-        memcpy(tmpIv, ciphertext + (i + AES_BLOCK_SIZE), AES_BLOCK_SIZE);
+        // Copy current ciphertext block to temp buffer as we will use for the next one.
+        memcpy(tmpIv, ciphertext + i, AES_BLOCK_SIZE);
 
         // Decipher block
-        AES::InvCipher((uint8_t (*)[Nl])ciphertext + (i * AES_BLOCK_SIZE));
+        AES::InvCipher((uint8_t (*)[Nl])(ciphertext + i));
 
-        uint8_t *plaintext = ciphertext + (i * AES_BLOCK_SIZE);
+        // Xor plaintext with last encrypted block
+        uint8_t *plaintext = ciphertext + i;
         this->AddIv(plaintext);
 
+        // Copy current ciphertext block to next iv.
         memcpy(this->iv, tmpIv, AES_BLOCK_SIZE);
     }
 };
@@ -226,82 +195,82 @@ void AES::Cipher (uint8_t state[Nb][Nl]){
 
     uint8_t roundNumber;
 
-    DEBUG_STATE("Initial plaintext block", state);
+    AES_DEBUG_STATE("Initial plaintext block", state);
 
     this->AddRoundKey(state, 0);
 
-    DEBUG_STATE("Original key add", state);
+    AES_DEBUG_STATE("Original key add", state);
 
     for (roundNumber = 1; roundNumber < this->Nr; roundNumber++){
 
-        DEBUG_MSG(endl << "Round #" << + +roundNumber);
+        AES_DEBUG_MSG(endl << "Round #" << + +roundNumber);
         
         this->SubBytes(state);
-        DEBUG_STATE("After SubBytes()", state);
+        AES_DEBUG_STATE("After SubBytes()", state);
 
         this->ShiftRows(state);
-        DEBUG_STATE("After ShiftRows()", state);
+        AES_DEBUG_STATE("After ShiftRows()", state);
 
         this->MixColumns(state);
-        DEBUG_STATE("After MixColumns()", state);
+        AES_DEBUG_STATE("After MixColumns()", state);
 
         this->AddRoundKey(state, roundNumber);
-        DEBUG_STATE("After AddRoundKey()", state);
+        AES_DEBUG_STATE("After AddRoundKey()", state);
     }
 
-    DEBUG_MSG(endl << "Last round #" << +roundNumber);
+    AES_DEBUG_MSG(endl << "Last round #" << +roundNumber);
 
     this->SubBytes(state);
-    DEBUG_STATE("After SubBytes()", state);
+    AES_DEBUG_STATE("After SubBytes()", state);
 
     this->ShiftRows(state);
-    DEBUG_STATE("After ShiftRows()", state);
+    AES_DEBUG_STATE("After ShiftRows()", state);
 
     this->AddRoundKey(state, roundNumber);
 
-    DEBUG_STATE("Final output", state);
+    AES_DEBUG_STATE("Final output", state);
 
-    DEBUG_MSG(endl);
+    AES_DEBUG_MSG(endl);
 };
 
 void AES::InvCipher (uint8_t state[Nb][Nl]){
 
     uint8_t roundNumber;
 
-    DEBUG_STATE("Initial ciphertext block", state);
+    AES_DEBUG_STATE("Initial ciphertext block", state);
 
     this->AddRoundKey(state, this->Nr);
 
     this->InvShiftRows(state);
-        DEBUG_STATE("After InvShiftRows()", state);
+        AES_DEBUG_STATE("After InvShiftRows()", state);
 
     this->InvSubBytes(state);
-    DEBUG_STATE("After InvSubBytes()", state);
+    AES_DEBUG_STATE("After InvSubBytes()", state);
 
-    DEBUG_STATE("Last RoundKey add", state);
+    AES_DEBUG_STATE("Last RoundKey add", state);
 
     for (roundNumber = this->Nr - 1; roundNumber > 0; roundNumber--){
 
-        DEBUG_MSG(endl << "Reversing round #" << + +roundNumber);
+        AES_DEBUG_MSG(endl << "Reversing round #" << + +roundNumber);
 
         this->AddRoundKey(state, roundNumber); 
-        DEBUG_STATE("After AddRoundKey()", state);
+        AES_DEBUG_STATE("After AddRoundKey()", state);
 
         this->InvMixColumns(state); 
-        DEBUG_STATE("After InvMixColumns()", state);
+        AES_DEBUG_STATE("After InvMixColumns()", state);
 
         this->InvShiftRows(state);
-        DEBUG_STATE("After InvShiftRows()", state);
+        AES_DEBUG_STATE("After InvShiftRows()", state);
 
         this->InvSubBytes(state);
-        DEBUG_STATE("After InvSubBytes()", state);
+        AES_DEBUG_STATE("After InvSubBytes()", state);
     }
 
-    DEBUG_MSG(endl << "Reversing first round" << +roundNumber);
+    AES_DEBUG_MSG(endl << "Reversing first round");
 
     this->AddRoundKey(state, 0);
 
-    DEBUG_STATE("Final output with original key add", state);
+    AES_DEBUG_STATE("Final output with original key add", state);
 };
 
 /* 
@@ -324,38 +293,38 @@ void AES::ExpandKey (uint8_t *key){
     
     uint8_t tmp[4];
 
-    DEBUG_MSG("ExpandKey (with " << +this->keySize << " bits key)");
+    AES_DEBUG_MSG("ExpandKey (with " << +this->keySize << " bits key)");
 
     // for each word in our needed round keys
     for (uint8_t i = 0; i < Nb * (this->Nr + 1); i++){
 
-        DEBUG_MSG("i: " << +i);
+        AES_DEBUG_MSG("i: " << +i);
 
         // First round key is the actual encryption key.
         if (i < this->Nk){
 
             // Copy each word from the 
             memcpy(this->RoundKeys + (i * 4), key + (i * 4), 4);
-            DEBUG_WORD("original key", this->RoundKeys + (i * 4));
+            AES_DEBUG_WORD("original key", this->RoundKeys + (i * 4));
 
             continue;
         }
 
         memcpy(tmp, this->RoundKeys + ((i - 1) * 4), 4);
-        DEBUG_WORD("w[i-1]", tmp);
+        AES_DEBUG_WORD("w[i-1]", tmp);
 
         if (i % this->Nk == 0){
 
             this->RotWord(tmp);
-            DEBUG_WORD("After RotWord()", tmp);
+            AES_DEBUG_WORD("After RotWord()", tmp);
 
             this->SubWord(tmp);
-            DEBUG_WORD("After SubWord()", tmp);
+            AES_DEBUG_WORD("After SubWord()", tmp);
 
             // we XOR only the first byte of our word because Rcon constant has 3 null bytes after its highest order byte (and a ^ 0 = a).
             // Only this highest order byte is multiplied by 2 in GF(2^8) for each step of Rcon.
             tmp[0] ^= Rcon[i/this->Nk];
-            DEBUG_WORD("After XOR Rcon[i]", tmp);
+            AES_DEBUG_WORD("After XOR Rcon[i]", tmp);
 
             this->RoundKeys[(i * 4)]      = tmp[0];
             this->RoundKeys[(i * 4) + 1]  = tmp[1];
@@ -366,7 +335,7 @@ void AES::ExpandKey (uint8_t *key){
         if (this->keySize == AESKeySize::AES_256 && i % this->Nk == 4){
 
             this->SubWord(tmp);
-            DEBUG_WORD("After Subword()", tmp);
+            AES_DEBUG_WORD("After Subword()", tmp);
 
             this->RoundKeys[(i * 4)]      = tmp[0];
             this->RoundKeys[(i * 4) + 1]  = tmp[1];
@@ -375,18 +344,18 @@ void AES::ExpandKey (uint8_t *key){
         }
 
         memcpy(this->RoundKeys + (i * 4), this->RoundKeys + ((i - this->Nk) * 4), 4);
-        DEBUG_WORD("w[i - Nk]", this->RoundKeys + (i * 4));
+        AES_DEBUG_WORD("w[i - Nk]", this->RoundKeys + (i * 4));
 
         this->RoundKeys[(i * 4)]      ^= tmp[0];
         this->RoundKeys[(i * 4) + 1]  ^= tmp[1];
         this->RoundKeys[(i * 4) + 2]  ^= tmp[2];
         this->RoundKeys[(i * 4) + 3]  ^= tmp[3];
 
-        DEBUG_WORD("After XOR w[i-Nk]", this->RoundKeys + (i * 4));
+        AES_DEBUG_WORD("After XOR w[i-Nk]", this->RoundKeys + (i * 4));
 
     }
 
-    DEBUG_MSG(endl);
+    AES_DEBUG_MSG(endl);
 };
 
 // Apply S-Box substitution to a single word (4 bytes), to be used inside the ExpandKey method.
