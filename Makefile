@@ -40,7 +40,7 @@ TESTCFLAGS := -lgtest_main -lgtest -lpthread
 .PHONY: all clean debug prepare release
 
 # Default build
-all: prepare release debug tests
+all: prepare release debug test
 
 #
 # Debug
