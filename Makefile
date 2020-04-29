@@ -13,7 +13,7 @@ TESTS := $(wildcard tests/*.cpp)
 # Main build settings
 #
 CC     := g++
-CFLAGS := -std=c++17 -Wall -Werror -Wextra
+CFLAGS := -std=c++17 -Wall -Werror -Wextra -lSimpleAmqpClient
 EXE  := workerapp
 
 #

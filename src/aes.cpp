@@ -196,7 +196,7 @@ void AES::Cipher (uint8_t state[Nb][Nl]){
     AES_DEBUG_STATE("Initial plaintext block", state);
 
     this->AddRoundKey(state, 0);
-
+    
     AES_DEBUG_STATE("Original key add", state);
 
     for (roundNumber = 1; roundNumber < this->Nr; roundNumber++){
@@ -240,7 +240,7 @@ void AES::InvCipher (uint8_t state[Nb][Nl]){
     this->AddRoundKey(state, this->Nr);
 
     this->InvShiftRows(state);
-        AES_DEBUG_STATE("After InvShiftRows()", state);
+    AES_DEBUG_STATE("After InvShiftRows()", state);
 
     this->InvSubBytes(state);
     AES_DEBUG_STATE("After InvSubBytes()", state);

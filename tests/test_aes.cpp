@@ -4,8 +4,6 @@
 #include "../src/aes.h"
 #include "../src/debug.h"
 
-class AESTest : public ::testing::Test {};
-
 TEST(AES128, EncryptAndDecryptECB){
 
     uint8_t input [] = {
