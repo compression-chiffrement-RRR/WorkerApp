@@ -1,8 +1,9 @@
 #include <gtest/gtest.h>
 #include <stdint.h>
+#include <iostream>
 #include <cstring>
+
 #include "../src/aes.h"
-#include "../src/debug.h"
 
 TEST(AES128, EncryptAndDecryptECB){
 
@@ -179,4 +180,38 @@ TEST(AES128, EncryptAndDecryptCBC){
     ASSERT_EQ(0, memcmp(input, expectedPlaintext, sizeof(input)));
 
     delete [] expectedPlaintext;
+}
+
+TEST(AES128, EncryptAndDecryptFileCBC){
+
+    uint8_t key [] = { 
+        0x56, 0xe4, 0x7a, 0x38, 
+        0xc5, 0x59, 0x89, 0x74, 
+        0xbc, 0x46, 0x90, 0x3d, 
+        0xba, 0x29, 0x03, 0x49,
+        0x56, 0xe4, 0x7a, 0x38, 
+        0xc5, 0x59, 0x89, 0x74, 
+        0xbc, 0x46, 0x90, 0x3d, 
+        0xba, 0x29, 0x03, 0x49
+    };
+
+    uint8_t iv [] = {
+        0x8c, 0xe8, 0x2e, 0xef, 
+        0xbe, 0xa0, 0xda, 0x3c, 
+        0x44, 0x69, 0x9e, 0xd7, 
+        0xdb, 0x51, 0xb7, 0xd9
+    };
+
+    const char *original = "/root/tests/testfiles/lorem.txt";
+    const char *encrypted = "/root/tests/testfiles/lorem.enc.txt";
+    const char *decrypted = "/root/tests/testfiles/lorem.dec.txt";
+
+    AES aes = AES(AESKeySize::AES_256, AESMode::CBC, key, iv);
+
+    ASSERT_EQ(0, aes.EncryptFile(original, encrypted));
+
+    aes.SetIv(iv);
+
+    ASSERT_EQ(0, aes.DecryptFile(encrypted, decrypted));
+
 }

@@ -6,6 +6,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <cstddef>
 
 // number of columns in one block.
 #define Nb 4
@@ -73,9 +74,9 @@ class AES {
 
         
         The "length" parameter is the size in bytes of the data within "buffer" to be encrypted. 
-        Of course, according to the buffer "parameter" constraints, it must be a multiple of the block size in AES (which means "length" % 16 == 0 ).
+        Of course, according to the buffer "parameter" constraints, it must be a multiple of the block size in AES (which means "length" % AES_BLOCK_SIZE == 0 ).
 
-        returns 0 on success, or -1 if the buffer was NULL or if length % 16 != 0.
+        returns 0 on success, or -1 if the buffer was NULL or if length % AES_BLOCK_SIZE != 0.
 
     */
 
@@ -90,10 +91,14 @@ class AES {
         The "length" parameter is the length of "buffer", in bytes. 
         It needs to be a multiple of the AES cipher block size (which means "length" % 16 == 0).
 
-        returns 0 on success, or -1 if the buffer was NULL or if length % 16 != 0.
+        returns 0 on success, or -1 if the buffer was NULL or if length % AES_BLOCK_SIZE != 0.
     */
 
     int Decrypt(uint8_t *ciphertext, size_t length);
+
+    // Convenience methods for encrypting/decrypting a file.
+    int EncryptFile(const char *inputPath, const char *outputPath);
+    int DecryptFile(const char *inputPath, const char *outputPath);
 
     // Manually reset the IV when you want to use the same instance of AES for encrypting, then decrypting.
     void SetIv(uint8_t *iv);

@@ -31,7 +31,7 @@ void DisplayState(uint8_t state[Nb][Nl]);
 
 #define AES_DEBUG_MSG(msg)
 #define AES_DEBUG_WORD(word, debug)
-#define AES_DEBUG_STATE(msg, word)
+#define AES_DEBUG_STATE(msg, word) 
 
 #endif
 

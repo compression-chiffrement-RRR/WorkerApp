@@ -4,6 +4,9 @@
 SRCS := $(wildcard src/*.c) 
 SRCS += $(wildcard src/*.cpp)
 
+HEADERS := $(wildcard src/*.h) 
+HEADERS += $(wildcard src/*.hpp)
+
 #
 # Test files
 #
@@ -35,12 +38,12 @@ RELCFLAGS := -O3 -DNDEBUG -D_FORTIFY_SOURCE=2 -D_GLIBCXX_ASSERTIONS -fstack-prot
 #
 TESTDIR := tests/bin
 TESTEXE := $(TESTDIR)/workerapp-test
-TESTCFLAGS := -lgtest_main -lgtest -lpthread
+TESTCFLAGS := -O3 -g -lgtest_main -lgtest -lpthread
 
 .PHONY: all clean debug prepare release
 
 # Default build
-all: prepare release debug test
+all: prepare release debug
 
 #
 # Debug
@@ -55,16 +58,17 @@ $(DBGEXE): $(SRCS)
 #
 release: prepare $(RELEXE)
 
-$(RELEXE): $(SRCS)
+$(RELEXE): $(SRCS) 
 	$(CC) $(CFLAGS) $(RELCFLAGS) -o $(RELEXE) $^
 
 #
 # Tests
 #
 test: prepare $(TESTEXE)
+	$(TESTEXE)
 
-$(TESTEXE): $(TESTS) $(SRCS)
-	$(CC) $(CFLAGS) $(TESTCFLAGS) $(DBGCFLAGS) -o $(TESTEXE) $(filter-out src/main.cpp, $^)
+$(TESTEXE): $(TESTS) $(SRCS) 
+	$(CC) $(CFLAGS) $(TESTCFLAGS) -o $(TESTEXE) $(filter-out src/main.cpp, $^)
 
 #
 # Other rules
