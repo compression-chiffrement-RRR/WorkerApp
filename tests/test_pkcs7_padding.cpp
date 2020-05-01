@@ -5,7 +5,7 @@
 #include "../src/aes.h"
 #include "../src/debug.h"
 
-TEST(PKCS7Padding, PadIncompleteBlock){
+TEST(PKCS7PaddingTest, PadIncompleteBlock){
 
     uint8_t block [] = {
         0x00, 0x01, 0x02, 0x04,
@@ -29,7 +29,7 @@ TEST(PKCS7Padding, PadIncompleteBlock){
 
 }
 
-TEST(PKCS7Padding, PadCompleteBlock){
+TEST(PKCS7PaddingTest, PadCompleteBlock){
 
     uint8_t block [] = {
         0x00, 0x01, 0x02, 0x04,
@@ -52,7 +52,7 @@ TEST(PKCS7Padding, PadCompleteBlock){
     ASSERT_EQ(0, memcmp(block, expectedPadding, AES_BLOCK_SIZE));
 }
 
-TEST(PKCS7Padding, RemovePaddingIncompleteBlock){
+TEST(PKCS7PaddingTest, RemovePaddingIncompleteBlock){
     
     uint8_t paddedBlock [] = {
         0x00, 0x01, 0x02, 0x04,
@@ -68,7 +68,7 @@ TEST(PKCS7Padding, RemovePaddingIncompleteBlock){
     ASSERT_EQ(12, blockLength);
 }
 
-TEST(PKCS7Padding, RemovePaddingCompleteBlock){
+TEST(PKCS7PaddingTest, RemovePaddingCompleteBlock){
     
     uint8_t paddedBlock [] = {
         0x10, 0x10, 0x10, 0x10,

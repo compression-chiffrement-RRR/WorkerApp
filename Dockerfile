@@ -1,17 +1,15 @@
 FROM gcc:latest
 
-ARG BOOST_VERSION=boost_1_73_0
-
-# Install cmake and google C++ test
+# Install cmake, google C++ test, libcurl4 
 RUN apt-get -y update
-RUN apt-get -y install gdb cmake googletest
+RUN apt-get -y install gdb cmake googletest libcurl4
 
 # Install Boost (SimpleAmqpClient dependency)
 WORKDIR /var/tmp
-RUN wget https://dl.bintray.com/boostorg/release/1.73.0/source/${BOOST_VERSION}.tar.bz2 && \
-    tar --bzip2 -xf ${BOOST_VERSION}.tar.bz2
+RUN wget https://dl.bintray.com/boostorg/release/1.73.0/source/boost_1_73_0.tar.bz2 && \
+    tar --bzip2 -xf boost_1_73_0.tar.bz2
 
-WORKDIR ${BOOST_VERSION}
+WORKDIR /var/tmp/boost_1_73_0
 RUN ./bootstrap.sh && \
     ./b2 install || true
 
@@ -21,8 +19,9 @@ RUN git clone https://github.com/alanxz/rabbitmq-c
 
 WORKDIR /var/tmp/rabbitmq-c
 RUN mkdir build
+
 WORKDIR /var/tmp/rabbitmq-c/build
-RUN pwd && ls -la && cmake .. && cmake --build . --target install
+RUN cmake .. && cmake --build . --target install
 
 # Install SimpleAmqpClient
 WORKDIR /var/tmp
@@ -33,6 +32,7 @@ RUN mkdir build
 WORKDIR /var/tmp/SimpleAmqpClient/build
 RUN cmake .. && make install
 
+# update linker library paths.
 RUN ldconfig
 
 # build googletest from source

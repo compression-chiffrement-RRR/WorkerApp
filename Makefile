@@ -16,7 +16,8 @@ TESTS := $(wildcard tests/*.cpp)
 # Main build settings
 #
 CC     := g++
-CFLAGS := -std=c++17 -Wall -Werror -Wextra -lSimpleAmqpClient
+CFLAGS := -std=c++17 -Wall -Werror -Wextra
+CLIBS := -lSimpleAmqpClient -lcurl
 EXE  := workerapp
 
 #
@@ -38,7 +39,7 @@ RELCFLAGS := -O3 -DNDEBUG -D_FORTIFY_SOURCE=2 -D_GLIBCXX_ASSERTIONS -fstack-prot
 #
 TESTDIR := tests/bin
 TESTEXE := $(TESTDIR)/workerapp-test
-TESTCFLAGS := -O3 -g -lgtest_main -lgtest -lpthread
+TESTCFLAGS := -O3 -g -DDEBUG -lgtest_main -lgtest -lpthread
 
 .PHONY: all clean debug prepare release
 
@@ -51,7 +52,7 @@ all: prepare release debug
 debug: prepare $(DBGEXE)
 
 $(DBGEXE): $(SRCS)
-	$(CC) $(CFLAGS) $(DBGCFLAGS) -o $(DBGEXE) $^
+	$(CC) $(CFLAGS) $(DBGCFLAGS) $(CLIBS) -o $(DBGEXE) $^
 
 #
 # Release
@@ -59,7 +60,7 @@ $(DBGEXE): $(SRCS)
 release: prepare $(RELEXE)
 
 $(RELEXE): $(SRCS) 
-	$(CC) $(CFLAGS) $(RELCFLAGS) -o $(RELEXE) $^
+	$(CC) $(CFLAGS) $(RELCFLAGS) $(CLIBS) -o $(RELEXE) $^
 
 #
 # Tests
@@ -68,7 +69,7 @@ test: prepare $(TESTEXE)
 	$(TESTEXE)
 
 $(TESTEXE): $(TESTS) $(SRCS) 
-	$(CC) $(CFLAGS) $(TESTCFLAGS) -o $(TESTEXE) $(filter-out src/main.cpp, $^)
+	$(CC) $(CFLAGS) $(TESTCFLAGS) $(CLIBS) -o $(TESTEXE) $(filter-out src/main.cpp, $^)
 
 #
 # Other rules

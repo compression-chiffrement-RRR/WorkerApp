@@ -5,7 +5,7 @@
 
 #include "../src/aes.h"
 
-TEST(AES128, EncryptAndDecryptECB){
+TEST(AESTest, EncryptAndDecrypt_ECB_128){
 
     uint8_t input [] = {
         0x32, 0x43, 0xf6, 0xa8, 
@@ -32,7 +32,7 @@ TEST(AES128, EncryptAndDecryptECB){
     
     memcpy(expectedPlaintext, input, sizeof(input));
 
-    AES aes = AES(AESKeySize::AES_128, AESMode::ECB, key);
+    AES aes (AESKeySize::AES_128, AESMode::ECB, key);
 
     aes.Encrypt(input, sizeof(input));
 
@@ -46,7 +46,7 @@ TEST(AES128, EncryptAndDecryptECB){
 
 }
 
-TEST(AES192, EncryptAndDecryptECB){
+TEST(AESTest, EncryptAndDecrypt_ECB_192){
 
     uint8_t input [] = {
         0x00, 0x11, 0x22, 0x33, 
@@ -75,7 +75,7 @@ TEST(AES192, EncryptAndDecryptECB){
     
     memcpy(expectedPlaintext, input, sizeof(input));
 
-    AES aes = AES(AESKeySize::AES_192, AESMode::ECB, key);
+    AES aes (AESKeySize::AES_192, AESMode::ECB, key);
 
     aes.Encrypt(input, sizeof(input));
 
@@ -89,7 +89,7 @@ TEST(AES192, EncryptAndDecryptECB){
 
 }
 
-TEST(AES256, EncryptAndDecryptECB){
+TEST(AESTest, EncryptAndDecrypt_ECB_256){
 
     uint8_t input [] = {
         0x00, 0x11, 0x22, 0x33, 
@@ -120,7 +120,7 @@ TEST(AES256, EncryptAndDecryptECB){
     
     memcpy(expectedPlaintext, input, sizeof(input));
 
-    AES aes = AES(AESKeySize::AES_256, AESMode::ECB, key);
+    AES aes (AESKeySize::AES_256, AESMode::ECB, key);
 
     aes.Encrypt(input, sizeof(input));
 
@@ -134,7 +134,7 @@ TEST(AES256, EncryptAndDecryptECB){
 
 }
 
-TEST(AES128, EncryptAndDecryptCBC){
+TEST(AESTest, EncryptAndDecrypt_CBC_128){
 
     uint8_t input [] = {
         0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7, 0xa8, 0xa9, 0xaa, 0xab, 0xac, 0xad, 0xae, 0xaf, 
@@ -168,7 +168,7 @@ TEST(AES128, EncryptAndDecryptCBC){
     
     memcpy(expectedPlaintext, input, sizeof(input));
 
-    AES aes = AES(AESKeySize::AES_128, AESMode::CBC, key, iv);
+    AES aes (AESKeySize::AES_128, AESMode::CBC, key, iv);
 
     aes.Encrypt(input, sizeof(input));
 
@@ -182,13 +182,9 @@ TEST(AES128, EncryptAndDecryptCBC){
     delete [] expectedPlaintext;
 }
 
-TEST(AES128, EncryptAndDecryptFileCBC){
+TEST(AESTest, EncryptAndDecrypt_File_CBC_128){
 
     uint8_t key [] = { 
-        0x56, 0xe4, 0x7a, 0x38, 
-        0xc5, 0x59, 0x89, 0x74, 
-        0xbc, 0x46, 0x90, 0x3d, 
-        0xba, 0x29, 0x03, 0x49,
         0x56, 0xe4, 0x7a, 0x38, 
         0xc5, 0x59, 0x89, 0x74, 
         0xbc, 0x46, 0x90, 0x3d, 
@@ -206,7 +202,7 @@ TEST(AES128, EncryptAndDecryptFileCBC){
     const char *encrypted = "/root/tests/testfiles/lorem.enc.txt";
     const char *decrypted = "/root/tests/testfiles/lorem.dec.txt";
 
-    AES aes = AES(AESKeySize::AES_256, AESMode::CBC, key, iv);
+    AES aes (AESKeySize::AES_128, AESMode::CBC, key, iv);
 
     ASSERT_EQ(0, aes.EncryptFile(original, encrypted));
 
@@ -214,4 +210,6 @@ TEST(AES128, EncryptAndDecryptFileCBC){
 
     ASSERT_EQ(0, aes.DecryptFile(encrypted, decrypted));
 
+    remove(encrypted);
+    remove(decrypted);
 }

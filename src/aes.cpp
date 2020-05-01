@@ -1,14 +1,11 @@
 #include <cstring>
 #include <fstream>
 #include <stdint.h>
-
 #include <iostream>
 #include <unistd.h>
 
-
 #include "aes.h"
 #include "pkcs7_padding.h"
-
 #include "debug.h"
 
 using namespace std;
@@ -114,7 +111,7 @@ int AES::EncryptFile(const char *inputPath, const char *outputPath){
         goto clean;
 
     in.open(inputPath, ifstream::binary);
-    out.open(outputPath, ifstream::binary);
+    out.open(outputPath, ofstream::binary|ofstream::trunc);
 
     if (!in.is_open() || !out.is_open())
         goto clean;
@@ -154,8 +151,11 @@ clean:
     if (in.is_open())
         in.close();
 
-    if (out.is_open())
+    if (out.is_open()){
         out.close();
+        if (ret != 0)
+            remove(outputPath);
+    }
 
     if (buffer != nullptr)
         delete [] buffer;
@@ -177,7 +177,7 @@ int AES::DecryptFile(const char *inputPath, const char *outputPath){
         goto clean;
 
     in.open(inputPath, ifstream::binary);
-    out.open(outputPath, ifstream::binary);
+    out.open(outputPath, ofstream::binary|ofstream::trunc);
 
     if (!in.is_open() || !out.is_open())
         goto clean;
@@ -216,8 +216,11 @@ clean:
     if (in.is_open())
         in.close();
 
-    if (out.is_open())
+    if (out.is_open()){
         out.close();
+        if (ret != 0)
+            remove(outputPath);
+    }
 
     if (buffer != nullptr)
         delete [] buffer;

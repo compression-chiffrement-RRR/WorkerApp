@@ -12,7 +12,7 @@ make all
 ```
 * To start tests
 ```
-./tests/bin/workerapp-test
+make tests
 ```
 * To launch the app in release/debug mode
 ```
