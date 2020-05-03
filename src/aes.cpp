@@ -97,7 +97,7 @@ int AES::Decrypt(uint8_t *ciphertext, size_t length){
 
 #define READ_BUFFER_SIZE AES_BLOCK_SIZE * 10000
 
-int AES::EncryptFile(const char *inputPath, const char *outputPath){
+int AES::EncryptFile(const string& inputPath, const string& outputPath){
 
     int ret = -1;
 
@@ -128,7 +128,7 @@ int AES::EncryptFile(const char *inputPath, const char *outputPath){
         blocks = read - rest; 
 
         this->Encrypt(buffer, blocks);
-        out.write((const char *)buffer, blocks);
+        out.write((char *)buffer, blocks);
 
         if (out.bad() || out.fail())
             goto clean;
@@ -139,7 +139,7 @@ int AES::EncryptFile(const char *inputPath, const char *outputPath){
     PKCS7Padding::AddBlockPadding(padding, rest, AES_BLOCK_SIZE);
 
     this->Encrypt(padding, AES_BLOCK_SIZE);
-    out.write((const char *) padding, AES_BLOCK_SIZE);
+    out.write((char *) padding, AES_BLOCK_SIZE);
 
     if (out.bad() || out.fail())
         goto clean;
@@ -154,7 +154,7 @@ clean:
     if (out.is_open()){
         out.close();
         if (ret != 0)
-            remove(outputPath);
+            remove(outputPath.c_str());
     }
 
     if (buffer != nullptr)
@@ -163,7 +163,7 @@ clean:
     return ret;
 };
 
-int AES::DecryptFile(const char *inputPath, const char *outputPath){
+int AES::DecryptFile(const string& inputPath, const string& outputPath){
 
     int ret = -1;
 
@@ -202,7 +202,7 @@ int AES::DecryptFile(const char *inputPath, const char *outputPath){
             read += blockLength;
         }
 
-        out.write((const char *)buffer, read);
+        out.write((char *)buffer, read);
 
         if (out.bad() || out.fail())
             goto clean;
@@ -219,7 +219,7 @@ clean:
     if (out.is_open()){
         out.close();
         if (ret != 0)
-            remove(outputPath);
+            remove(outputPath.c_str());
     }
 
     if (buffer != nullptr)
@@ -715,7 +715,7 @@ uint8_t AES::XTime (uint8_t number){
 
     We can do the same for any multiplication by any constant.
 
-    In the GMultiply method, the multiplier will only go up to 15 in decimal (0b00001111 in binary or 0x0E in hex), so the maximum repetition of the xtime operation is six times.
+    In the GMultiply method, the multiplier will only go up to 15 in decimal (0b00001111 in binary or 0x0F in hex), so the maximum repetition of the xtime operation is six times.
 
     See 4.2.1 in the NIST specification for more details about what is going on here.
 */

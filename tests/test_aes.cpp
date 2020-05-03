@@ -2,6 +2,9 @@
 #include <stdint.h>
 #include <iostream>
 #include <cstring>
+#include <string>
+
+using namespace std;
 
 #include "../src/aes.h"
 
@@ -198,9 +201,9 @@ TEST(AESTest, EncryptAndDecrypt_File_CBC_128){
         0xdb, 0x51, 0xb7, 0xd9
     };
 
-    const char *original = "/root/tests/testfiles/lorem.txt";
-    const char *encrypted = "/root/tests/testfiles/lorem.enc.txt";
-    const char *decrypted = "/root/tests/testfiles/lorem.dec.txt";
+    const string original = "/root/tests/testfiles/lorem.txt";
+    const string encrypted = "/root/tests/testfiles/lorem.enc.txt";
+    const string decrypted = "/root/tests/testfiles/lorem.dec.txt";
 
     AES aes (AESKeySize::AES_128, AESMode::CBC, key, iv);
 
@@ -210,6 +213,6 @@ TEST(AESTest, EncryptAndDecrypt_File_CBC_128){
 
     ASSERT_EQ(0, aes.DecryptFile(encrypted, decrypted));
 
-    remove(encrypted);
-    remove(decrypted);
+    remove(encrypted.c_str());
+    remove(decrypted.c_str());
 }

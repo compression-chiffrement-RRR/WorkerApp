@@ -1,11 +1,15 @@
 #pragma once
 
+#include <string>
+
+using namespace std;
+
 class WorkerEnv {
     
     public:
 
-    static const char* Get(const char *var);
-    static int Set(const char *var, const char *value);
+    static const char *Get(const string& var);
+    static int Set(const string& var, const string& value);
 
     static constexpr const char *mainPrefix = "WORKER_APP_";
     

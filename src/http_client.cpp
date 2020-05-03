@@ -35,7 +35,7 @@ static size_t DownloadFile_WriteDataCallback(void *data, size_t size, size_t nme
     return size * nmemb;
 }
 
-int HttpClient::DownloadFile(const char *url, const char *outputFile){
+int HttpClient::DownloadFile(const string& url, const string& outputFile){
 
     int ret = -1;
     ofstream outFile;
@@ -48,7 +48,7 @@ int HttpClient::DownloadFile(const char *url, const char *outputFile){
     if (!outFile.is_open())
         goto clean;
 
-    curl_easy_setopt(this->curl, CURLOPT_URL, url);
+    curl_easy_setopt(this->curl, CURLOPT_URL, url.c_str());
 
     curl_easy_setopt(this->curl, CURLOPT_FOLLOWLOCATION, 1L);
     

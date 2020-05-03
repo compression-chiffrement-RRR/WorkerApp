@@ -5,7 +5,7 @@
 class HttpClient {
 
     private:
-    
+
     CURL *curl = NULL;
     
     public:
@@ -13,5 +13,5 @@ class HttpClient {
     HttpClient ();
     ~HttpClient ();
     
-    int DownloadFile (const char *url, const char *outputFile);
+    int DownloadFile (const std::string& url, const std::string& outputFile);
 };

@@ -1,16 +1,18 @@
 #include <gtest/gtest.h>
+#include <string>
 
 #include "../src/http_client.h"
 
+using namespace std;
 
 TEST(HttpClientTest, DownloadFile){
 
     HttpClient client;
-    const char *url = "https://the.earth.li/~sgtatham/putty/latest/w32/putty.exe";
-    const char *output = "/root/tests/testfiles/putty.exe";
+    const string url = "https://the.earth.li/~sgtatham/putty/latest/w32/putty.exe";
+    const string output = "/root/tests/testfiles/putty.exe";
 
     ASSERT_EQ(0, client.DownloadFile(url, output));
 
-    remove(output);
+    remove(output.c_str());
 
 }

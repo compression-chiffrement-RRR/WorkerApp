@@ -6,6 +6,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <string>
 #include <cstddef>
 
 // number of columns in one block.
@@ -15,6 +16,8 @@
 
 // AES block size in bytes
 #define AES_BLOCK_SIZE 16
+
+using namespace std;
 
 // Possible key sizes for the AES constructor.
 enum AESKeySize {
@@ -97,8 +100,8 @@ class AES {
     int Decrypt(uint8_t *ciphertext, size_t length);
 
     // Convenience methods for encrypting/decrypting a file.
-    int EncryptFile(const char *inputPath, const char *outputPath);
-    int DecryptFile(const char *inputPath, const char *outputPath);
+    int EncryptFile(const string& inputPath, const string& outputPath);
+    int DecryptFile(const string& inputPath, const string& outputPath);
 
     // Manually reset the IV when you want to use the same instance of AES for encrypting, then decrypting.
     void SetIv(uint8_t *iv);

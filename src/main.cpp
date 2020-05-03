@@ -1,5 +1,7 @@
 #include <iostream>
+#include <vector>
 #include <curl/curl.h>
+#include <SimpleAmqpClient/SimpleAmqpClient.h>
 
 #include "worker_env.h"
 
@@ -7,41 +9,41 @@ using namespace std;
 
 static void CheckEnv();
 
-int main (__attribute__((unused)) int _argc,__attribute__((unused)) char **_argv){
+int main (__attribute__((unused)) int argc, __attribute__((unused)) char **argv){
     
     CheckEnv();
 
     curl_global_init(CURL_GLOBAL_ALL);
 
+    string fullHost = WorkerEnv::Get(WorkerEnv::rabbitMQHost) + ":" + WorkerEnv::Get(WorkerEnv::rabbitMQPort);
+
+    AmqpClient::Channel::ptr_t connection = AmqpClient::Channel::Create(fullHost);
+
     curl_global_cleanup();
-    
+
     return 0;
 }
 
 static void CheckEnv(){
 
-    bool ret = true;
-    unsigned int i = 0;
+    bool failure = false;
 
-    const char *mandatory [] = {
+    vector<string> mandatory {
         WorkerEnv::rabbitMQHost,
         WorkerEnv::rabbitMQPort,
         WorkerEnv::rabbitMQQueue,
         WorkerEnv::rabbitMQUsername,
         WorkerEnv::rabbitMQPassword,
         WorkerEnv::apiDomain,
-        nullptr
     };
 
-    while (mandatory[i] != nullptr){
-        
-        if (WorkerEnv::Get(mandatory[i]) == nullptr){
-            ret = false;
-            cerr << "ERROR: " << WorkerEnv::mainPrefix << mandatory[i] << " is missing from your environnement variables." << endl;
+    for (string s : mandatory){
+        if (WorkerEnv::Get(s) == nullptr){
+            failure = true;
+            cerr << "ERROR: " << WorkerEnv::mainPrefix << s << " is missing from your environnement variables." << endl;
         }
-        i++;
     }
 
-    if (ret == false)
-    exit(EXIT_FAILURE);
+    if (failure)
+        exit(EXIT_FAILURE);
 }

@@ -20,7 +20,7 @@ RUN git clone https://github.com/alanxz/rabbitmq-c
 WORKDIR /var/tmp/rabbitmq-c
 RUN mkdir build
 
-WORKDIR /var/tmp/rabbitmq-c/build
+WORKDIR /var/tmp/rabbitmq-c/build   
 RUN cmake .. && cmake --build . --target install
 
 # Install SimpleAmqpClient
