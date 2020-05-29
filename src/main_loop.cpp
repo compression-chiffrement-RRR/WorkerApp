@@ -52,7 +52,7 @@ void MainLoop(){
         queue, 
         "",  // consumer tag
         true, // no-local
-        true, // auto-ack
+        true, //. auto-ack
         false // exclusive subscribe
     );
 
