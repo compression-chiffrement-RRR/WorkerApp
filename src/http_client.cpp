@@ -53,7 +53,7 @@ int HttpClient::DownloadFile(const string& url, const string& outputFile){
     curl_easy_setopt(this->curl, CURLOPT_FOLLOWLOCATION, 1L);
     
     curl_easy_setopt(this->curl, CURLOPT_WRITEFUNCTION, DownloadFile_WriteDataCallback);
-    curl_easy_setopt(this->curl, CURLOPT_WRITEDATA, &outFile);
+    curl_easy_setopt(this->curl, CURLOPT_WRITEDATA, &outFile); 
 
     if (curl_easy_perform(this->curl) != CURLE_OK)
         goto clean;

@@ -18,7 +18,7 @@ typedef struct ProcessParameter {
 
 typedef struct ProcessType {
     const string name;
-    const vector<ParameterType> params;
+    const vector<ProcessParameter> params;
 } ProcessType;
 
 UploadMessage::UploadMessage (json body){
