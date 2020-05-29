@@ -2,7 +2,7 @@ FROM gcc:latest
 
 # Install cmake, google C++ test, libcurl4 
 RUN apt-get -y update
-RUN apt-get -y install gdb cmake googletest libcurl4
+RUN apt-get -y install gdb cmake googletest libcurl4 nlohmann-json3-dev
 
 # Install Boost (SimpleAmqpClient dependency)
 WORKDIR /var/tmp
@@ -40,3 +40,10 @@ WORKDIR /usr/src/googletest/
 RUN cmake . && make install
 
 WORKDIR /root
+RUN echo "#!/bin/bash\n\
+    set -e\n\
+    cd /root\n\
+    make release\n\
+    ./release/workerapp" > /usr/local/bin/start.sh && chmod 700 /usr/local/bin/start.sh
+
+CMD [ "/usr/local/bin/start.sh" ]

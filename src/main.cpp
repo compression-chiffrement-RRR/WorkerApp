@@ -1,9 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <curl/curl.h>
-#include <SimpleAmqpClient/SimpleAmqpClient.h>
 
 #include "worker_env.h"
+#include "main_loop.h"
 
 using namespace std;
 
@@ -15,9 +15,7 @@ int main (__attribute__((unused)) int argc, __attribute__((unused)) char **argv)
 
     curl_global_init(CURL_GLOBAL_ALL);
 
-    string fullHost = WorkerEnv::Get(WorkerEnv::rabbitMQHost) + ":" + WorkerEnv::Get(WorkerEnv::rabbitMQPort);
-
-    AmqpClient::Channel::ptr_t connection = AmqpClient::Channel::Create(fullHost);
+    MainLoop();
 
     curl_global_cleanup();
 
