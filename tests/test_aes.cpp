@@ -6,7 +6,7 @@
 
 using namespace std;
 
-#include "../src/aes.h"
+#include "../src/AES.h"
 
 TEST(AESTest, EncryptAndDecrypt_ECB_128){
 

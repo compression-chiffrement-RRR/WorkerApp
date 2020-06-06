@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "../src/http_client.h"
+#include "../src/HttpClient.h"
 
 using namespace std;
 

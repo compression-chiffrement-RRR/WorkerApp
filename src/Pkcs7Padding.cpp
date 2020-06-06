@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <cstddef>
-#include "pkcs7_padding.h"
+#include "Pkcs7Padding.h"
 
 void PKCS7Padding::AddBlockPadding (uint8_t *buffer, size_t dataLength, size_t blockLength){
     

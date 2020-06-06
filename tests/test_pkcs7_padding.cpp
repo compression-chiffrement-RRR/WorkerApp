@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include <cstring>
 
-#include "../src/pkcs7_padding.h"
-#include "../src/aes.h"
+#include "../src/Pkcs7Padding.h"
+#include "../src/AES.h"
 #include "../src/debug.h"
 
 TEST(PKCS7PaddingTest, PadIncompleteBlock){

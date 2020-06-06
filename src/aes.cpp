@@ -4,8 +4,8 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "aes.h"
-#include "pkcs7_padding.h"
+#include "AES.h"
+#include "Pkcs7Padding.h"
 #include "debug.h"
 
 using namespace std;

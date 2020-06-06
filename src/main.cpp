@@ -2,7 +2,7 @@
 #include <vector>
 #include <curl/curl.h>
 
-#include "worker_env.h"
+#include "WorkerEnv.h"
 #include "main_loop.h"
 
 using namespace std;

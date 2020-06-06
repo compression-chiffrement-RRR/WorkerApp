@@ -17,7 +17,7 @@ TESTS := $(wildcard tests/*.cpp)
 #
 CC     := g++
 CFLAGS := -std=c++17 -Wall -Werror -Wextra
-CLIBS := -lSimpleAmqpClient -lcurl
+CLIBS := -lSimpleAmqpClient -lcurl -lpthread
 EXE  := workerapp
 
 #
@@ -39,7 +39,7 @@ RELCFLAGS := -O3 -DNDEBUG -D_FORTIFY_SOURCE=2 -D_GLIBCXX_ASSERTIONS -fstack-prot
 #
 TESTDIR := tests/bin
 TESTEXE := $(TESTDIR)/workerapp-test
-TESTCFLAGS := -O3 -g -DDEBUG -lgtest_main -lgtest -lpthread
+TESTCFLAGS := -O3 -g -DDEBUG -lgtest_main -lgtest
 
 .PHONY: all clean debug prepare release
 

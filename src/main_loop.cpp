@@ -2,16 +2,23 @@
 #include <nlohmann/json.hpp>
 #include <stdlib.h>
 #include <string>
+#include <memory>
 #include <iostream>
+#include <thread>
 #include <vector>
 
-#include "upload_message.h"
+#include "UploadMessage.h"
 #include "main_loop.h"
-#include "worker_env.h"
+#include "WorkerEnv.h"
 
 using namespace std;
 using namespace AmqpClient;
 using json = nlohmann::json;
+
+void TreatMessageThreadRoutine (shared_ptr<UploadMessage> msg){
+    cout << "started thread" << endl;
+    msg->TreatMessage();
+}
 
 void MainLoop(){
 
@@ -65,20 +72,10 @@ void MainLoop(){
         channel->BasicConsumeMessage(consumerTag, envelope);
 
         try {
-
-            json body = nlohmann::json::parse(envelope->Message()->Body());
-
-            cout << "Received message : " << body << endl;
-
-            UploadMessage uploadMessage(body);
-
+            shared_ptr<UploadMessage> msg = make_shared<UploadMessage>(nlohmann::json::parse(envelope->Message()->Body()));
+            thread t (TreatMessageThreadRoutine, msg);
+            t.detach();
         } 
-
-        catch (vector<string>& errors){
-            for (const string e: errors){
-                cout << e << endl;
-            }
-        }
         
         catch (exception& e){
             cout << e.what() << endl;

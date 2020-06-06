@@ -1,7 +1,7 @@
 #include <curl/curl.h>
 #include <fstream>
 
-#include "http_client.h"
+#include "HttpClient.h"
 
 #include "debug.h"
 
