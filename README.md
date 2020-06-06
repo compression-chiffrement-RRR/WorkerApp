@@ -23,4 +23,101 @@ or
 ./release/workerapp
 ```
 
+### AMQP messages format
+
+The messages to be received by the worker look like this:
+
+```
+{ 
+	"fileUrl": "https://www.w3.org/TR/PNG/iso_8859-1.txt", 
+	"responseUrl": "http://mydomain.com/whereToReceiveResponseData",
+	"fileID": "TheFinalFileName",
+	"processes": [
+		{
+			"type": "ENCRYPT_AES_128_ECB",
+			"key": [ 0, 1, 2, 3, 4, 5, 6, 7, 11111, 9, 10, 11, 12, 13, 14, 15]
+		},
+		{
+			"type": "DECRYPT_AES_128_ECB",
+			"key": [ 0, 1, 2, 3, 4, 5, 6, 7, 11111, 9, 10, 11, 12, 13, 14, 15]
+		}
+	] 
+}
+```
+
+The `fileUrl` property is the file URL to download from the API.
+
+The `responseUrl` property is the API URL to be used for sending a success/error message when message has been processed.
+
+The `fileID` property is the name of the file to be written after processing.
+
+The `processes` is an array of processes objects. A process object has at least one string property which is `type`, it tells the worker what kind of process we should apply.
+
+All processes are executed following the indexes of the `processes` array.
+Extra parameters such as `key` or `iv` must be supplied for some processe types.
+
+Here is a list of all the available processes with the required parameters:
+
+##### ENCRYPT_AES_128_ECB
+
+`key` parameter must be an array of 16 bytes
+
+##### ENCRYPT_AES_192_ECB
+
+`key` parameter must be an array of 24 bytes
+
+##### ENCRYPT_AES_256_ECB
+
+`key` parameter must be an array of 32 bytes
+
+##### DECRYPT_AES_128_ECB
+
+`key` parameter must be an array of 16 bytes
+
+##### DECRYPT_AES_192_ECB
+
+`key` parameter must be an array of 24 bytes
+
+##### DECRYPT_AES_256_ECB
+
+`key` parameter must be an array of 32 bytes
+
+##### ENCRYPT_AES_128_CBC
+
+`key` parameter must be an array of 16 bytes
+`iv` parameter must be an array of 16 bytes
+
+##### ENCRYPT_AES_192_CBC
+
+`key` parameter must be an array of 24 bytes
+`iv` parameter must be an array of 16 bytes
+
+##### ENCRYPT_AES_256_CBC
+
+`key` parameter must be an array of 32 bytes
+`iv` parameter must be an array of 16 bytes
+
+##### DECRYPT_AES_128_CBC
+
+`key` parameter must be an array of 16 bytes
+`iv` parameter must be an array of 16 bytes
+
+##### DECRYPT_AES_192_CBC
+
+`key` parameter must be an array of 24 bytes
+`iv` parameter must be an array of 16 bytes
+
+##### DECRYPT_AES_256_CBC
+
+`key` parameter must be an array of 32 bytes
+`iv` parameter must be an array of 16 bytes
+
+##### COMPRESS_LZ78
+
+##### DECOMPRESS_LZ78
+
+
+
+
+
 
