@@ -85,31 +85,37 @@ Here is a list of all the available processes with the required parameters:
 ##### ENCRYPT_AES_128_CBC
 
 `key` parameter must be an array of 16 bytes
+
 `iv` parameter must be an array of 16 bytes
 
 ##### ENCRYPT_AES_192_CBC
 
 `key` parameter must be an array of 24 bytes
+
 `iv` parameter must be an array of 16 bytes
 
 ##### ENCRYPT_AES_256_CBC
 
 `key` parameter must be an array of 32 bytes
+
 `iv` parameter must be an array of 16 bytes
 
 ##### DECRYPT_AES_128_CBC
 
 `key` parameter must be an array of 16 bytes
+
 `iv` parameter must be an array of 16 bytes
 
 ##### DECRYPT_AES_192_CBC
 
 `key` parameter must be an array of 24 bytes
+
 `iv` parameter must be an array of 16 bytes
 
 ##### DECRYPT_AES_256_CBC
 
 `key` parameter must be an array of 32 bytes
+
 `iv` parameter must be an array of 16 bytes
 
 ##### COMPRESS_LZ78
