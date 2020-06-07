@@ -122,9 +122,9 @@ Here is a list of all the available processes with the required parameters:
 
 ##### DECOMPRESS_LZ78
 
-### API Response
+### API JSON response
 
-When the file has been processed by the worker, a POST request will be sent to the AMQP message's property `responseUrl`.
+When the file has been processed by the worker, a POST request will be sent to the API's URL supplied in the AMQP message's property `responseUrl`.
 
 It will contain the following JSON on success:
 
