@@ -122,8 +122,29 @@ Here is a list of all the available processes with the required parameters:
 
 ##### DECOMPRESS_LZ78
 
+### API Response
 
+When the file has been processed by the worker, a POST request will be sent to the AMQP message's property `responseUrl`.
 
+It will contain the following JSON on success:
 
+```
+{
+  "fileID": "TheFinalFileName",
+  "success": true
+}
+```
+
+If something wrong happened:
+
+```
+{
+  "error": "DERYPT_AES_128_CBC is not a valid process type.",
+  "fileID": "TheFinalFileName",
+  "success": false
+}
+```
+
+Note that, in some cases, the worker won't be able to send a response, for example when `responseUrl` is not supplied.
 
 
