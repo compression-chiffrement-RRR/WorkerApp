@@ -31,8 +31,7 @@ static void CheckEnv(){
         WorkerEnv::rabbitMQPort,
         WorkerEnv::rabbitMQQueue,
         WorkerEnv::rabbitMQUsername,
-        WorkerEnv::rabbitMQPassword,
-        WorkerEnv::apiDomain,
+        WorkerEnv::rabbitMQPassword
     };
 
     for (string s : mandatory){

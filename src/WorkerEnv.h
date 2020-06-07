@@ -18,6 +18,4 @@ class WorkerEnv {
     static constexpr const char *rabbitMQQueue      = "RABBITMQ_QUEUE";
     static constexpr const char *rabbitMQUsername   = "RABBITMQ_USERNAME";
     static constexpr const char *rabbitMQPassword   = "RABBITMQ_PASSWORD";
-    static constexpr const char *apiDomain          = "API_DOMAIN";
-
 };

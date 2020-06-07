@@ -1,5 +1,6 @@
 #include <curl/curl.h>
 #include <fstream>
+#include <iostream>
 
 #include "HttpClient.h"
 
@@ -40,7 +41,7 @@ int HttpClient::DownloadFile(const string& url, const string& outputFile){
     int ret = -1;
     ofstream outFile;
 
-    if (this->curl == nullptr)
+    if (this->curl == NULL)
         goto clean;
 
     outFile.open(outputFile, ofstream::binary|ofstream::trunc);
@@ -62,11 +63,55 @@ int HttpClient::DownloadFile(const string& url, const string& outputFile){
 
 clean:
 
-    if (this->curl != nullptr)
+    if (this->curl != NULL)
         curl_easy_reset(this->curl);
 
     if (outFile.is_open())
         outFile.close();
 
     return ret;
+};
+
+int HttpClient::SendPostRequest(const std::string& url, const json& body){
+
+    int ret = -1;
+
+    struct curl_slist *headers = NULL;
+    long code;
+
+    if (this->curl == NULL)
+        goto clean;
+
+    headers = curl_slist_append(headers, "Content-Type: application/json");
+
+    if (headers == NULL)
+        goto clean;
+ 
+    curl_easy_setopt(this->curl, CURLOPT_HTTPHEADER, headers);
+    
+    curl_easy_setopt(this->curl, CURLOPT_URL, url.c_str());
+    
+    curl_easy_setopt(this->curl, CURLOPT_POST, 1);
+    curl_easy_setopt(this->curl, CURLOPT_COPYPOSTFIELDS, body.dump().c_str()); 
+
+    if(curl_easy_perform(this->curl) != CURLE_OK)
+        goto clean;
+
+    curl_easy_getinfo(this->curl, CURLINFO_RESPONSE_CODE, &code);
+
+    if (code != 200)
+        goto clean;
+
+    ret = 0;
+
+clean:
+
+    if (headers != NULL)
+        curl_slist_free_all(headers);
+
+    if (this->curl != NULL)
+        curl_easy_reset(this->curl);
+
+    return ret;
+ 
 };

@@ -15,20 +15,14 @@ using namespace std;
 using namespace AmqpClient;
 using json = nlohmann::json;
 
-void TreatMessageThreadRoutine (shared_ptr<UploadMessage> msg){
-    cout << "started thread" << endl;
-    msg->TreatMessage();
+void MessageThreadRoutine (shared_ptr<UploadMessage> msg){
+    msg->Treat();
 }
 
 void MainLoop(){
 
     const char *queue = WorkerEnv::Get(WorkerEnv::rabbitMQQueue);
-    string hostWithPort = "";
-
-    hostWithPort.append(WorkerEnv::Get(WorkerEnv::rabbitMQHost));
-    hostWithPort.append(":");
-    hostWithPort.append(WorkerEnv::Get(WorkerEnv::rabbitMQPort));
-
+    string hostWithPort = WorkerEnv::Get(WorkerEnv::rabbitMQHost) + string(":") + WorkerEnv::Get(WorkerEnv::rabbitMQPort);
     cout << "Connecting to AMQP Broker (" << hostWithPort << ")" << endl;
 
     Channel::ptr_t channel = AmqpClient::Channel::Create(
@@ -52,8 +46,6 @@ void MainLoop(){
 
     cout << "Queue created." << endl;
 
-    cout << "Subscribing to queue" << endl;
-
     // subscribe as a consumer
     string consumerTag = channel->BasicConsume(
         queue, 
@@ -72,8 +64,10 @@ void MainLoop(){
         channel->BasicConsumeMessage(consumerTag, envelope);
 
         try {
-            shared_ptr<UploadMessage> msg = make_shared<UploadMessage>(nlohmann::json::parse(envelope->Message()->Body()));
-            thread t (TreatMessageThreadRoutine, msg);
+            json body = json::parse(envelope->Message()->Body());
+            thread t (
+                MessageThreadRoutine, 
+                make_shared<UploadMessage>(body));
             t.detach();
         } 
         

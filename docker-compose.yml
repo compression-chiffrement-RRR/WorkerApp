@@ -10,7 +10,7 @@ services:
         environment:
             RABBITMQ_ERLANG_COOKIE: shared_between_nodes
             RABBITMQ_DEFAULT_USER: worker
-            RABBITMQ_DEFAULT_PASS: jw8o9ey7hd1n6he
+            RABBITMQ_DEFAULT_PASS: worker
         ports:
             - 5672:5672
             - 15672:15672
@@ -22,7 +22,7 @@ services:
             WORKER_APP_RABBITMQ_PORT: 5672
             WORKER_APP_RABBITMQ_QUEUE: incoming_uploads
             WORKER_APP_RABBITMQ_USERNAME: worker
-            WORKER_APP_RABBITMQ_PASSWORD: jw8o9ey7hd1n6he
+            WORKER_APP_RABBITMQ_PASSWORD: worker
             WORKER_APP_API_DOMAIN: localhost
         volumes:
             - E:\dev\WorkerApp:/root

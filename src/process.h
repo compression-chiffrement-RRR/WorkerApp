@@ -88,5 +88,4 @@ class Process {
 
     virtual bool Execute(string filePath, string outputPath) = 0;
 
-    private:
 };

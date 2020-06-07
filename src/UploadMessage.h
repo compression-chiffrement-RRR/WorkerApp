@@ -19,8 +19,13 @@ class UploadMessage {
 
     public:
 
-    void TreatMessage();
+    void Treat();
+    void Success();
+    void Fail(string& error);
 
-    UploadMessage(json body);
+    UploadMessage(json& body);
     ~UploadMessage();
+
+    private:
+    bool SendResponse(json& body);
 };
