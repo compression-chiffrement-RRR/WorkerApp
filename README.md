@@ -12,7 +12,7 @@ make all
 ```
 * To start tests
 ```
-make tests
+make test
 ```
 * To launch the app in release/debug mode
 ```

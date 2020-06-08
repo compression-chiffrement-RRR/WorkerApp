@@ -82,8 +82,8 @@ UploadMessage::UploadMessage (json& body){
         }
         try {
             type = Process::DeserializeProcessType(process["type"]);
-        } catch (...){
-            string error = string(process["type"]) + " is not a valid process type.";
+        } catch (exception& e){
+            string error = string(process["type"]) + string(" is not a valid process type: ") + string(e.what());
             this->Fail(error);
             throw runtime_error(error);
         }
@@ -216,7 +216,7 @@ UploadMessage::UploadMessage (json& body){
             }
 
         } catch (exception& e){
-            string error = e.what();
+            string error = string("Missing or invalid parameter: ") + string(e.what());
             this->Fail(error);
             throw runtime_error(error);
         }
@@ -231,7 +231,7 @@ void UploadMessage::Treat (){
     HttpClient http;
     string tmpPath = RandomTmpFilename(20), newTmpPath;
     
-    if (http.DownloadFile(this->fileUrl, tmpPath) != 0){
+    if (http.DownloadFile(this->fileUrl, tmpPath) != true){
         string error = string("Failed to download ") + this->fileUrl;
         cout << error << endl;
         this->Fail(error);
@@ -239,25 +239,30 @@ void UploadMessage::Treat (){
     }
 
     for (const shared_ptr<Process> p: this->processes){
+        
         newTmpPath = RandomTmpFilename(20);
+        
         if (!p->Execute(tmpPath, newTmpPath)){
             string error = string("Failed to process file ") + tmpPath;
             cout << error << endl;
             this->Fail(error);
             return;
         }
+
         if (remove(tmpPath.c_str()) != 0){
             string error = string("Failed to remove temp file ") + tmpPath;
             cout << error << endl;
             this->Fail(error);
             return;
         }
+
         tmpPath = newTmpPath;
     }
 
     string finalPath = string("/tmp") + string("/") + this->fileID;
 
     if (rename(tmpPath.c_str(), finalPath.c_str()) != 0){
+        
         string error = string("Failed to rename temp file ") + tmpPath +  string(" to ") + finalPath;
         cout << error << endl;
         this->Fail(error);
@@ -300,10 +305,5 @@ void UploadMessage::Fail(string& error){
 bool UploadMessage::SendResponse (json& body){
 
     HttpClient client;
-
-    if (client.SendPostRequest(this->responseUrl, body) != 0){
-        return false;
-    }
-
-    return true;
+    return client.SendPostRequest(this->responseUrl, body);
 }

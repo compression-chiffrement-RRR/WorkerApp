@@ -17,7 +17,7 @@ HttpClient::HttpClient (){
 
 HttpClient::~HttpClient (){
     
-    if (this->curl != nullptr)
+    if (this->curl != NULL)
         curl_easy_cleanup(this->curl);
 };
 
@@ -36,9 +36,9 @@ static size_t DownloadFile_WriteDataCallback(void *data, size_t size, size_t nme
     return size * nmemb;
 }
 
-int HttpClient::DownloadFile(const string& url, const string& outputFile){
+bool HttpClient::DownloadFile(const string& url, const string& outputFile){
 
-    int ret = -1;
+    bool ret = false;
     ofstream outFile;
 
     if (this->curl == NULL)
@@ -59,7 +59,7 @@ int HttpClient::DownloadFile(const string& url, const string& outputFile){
     if (curl_easy_perform(this->curl) != CURLE_OK)
         goto clean;
 
-    ret = 0;
+    ret = true;
 
 clean:
 
@@ -72,12 +72,12 @@ clean:
     return ret;
 };
 
-int HttpClient::SendPostRequest(const std::string& url, const json& body){
+bool HttpClient::SendPostRequest(const std::string& url, const json& body){
 
-    int ret = -1;
+    bool ret = false;
 
     struct curl_slist *headers = NULL;
-    long code;
+    long code = -1L;
 
     if (this->curl == NULL)
         goto clean;
@@ -86,23 +86,21 @@ int HttpClient::SendPostRequest(const std::string& url, const json& body){
 
     if (headers == NULL)
         goto clean;
- 
-    curl_easy_setopt(this->curl, CURLOPT_HTTPHEADER, headers);
     
     curl_easy_setopt(this->curl, CURLOPT_URL, url.c_str());
-    
-    curl_easy_setopt(this->curl, CURLOPT_POST, 1);
+
+    curl_easy_setopt(this->curl, CURLOPT_HTTPHEADER, headers);
+
+    curl_easy_setopt(this->curl, CURLOPT_POST, 1L);
     curl_easy_setopt(this->curl, CURLOPT_COPYPOSTFIELDS, body.dump().c_str()); 
 
     if(curl_easy_perform(this->curl) != CURLE_OK)
         goto clean;
 
-    curl_easy_getinfo(this->curl, CURLINFO_RESPONSE_CODE, &code);
-
-    if (code != 200)
+    if (curl_easy_getinfo(this->curl, CURLINFO_RESPONSE_CODE, &code) != CURLE_OK || code < 200 || code >= 300)
         goto clean;
 
-    ret = 0;
+    ret = true;
 
 clean:
 

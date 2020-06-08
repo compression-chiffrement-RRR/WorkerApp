@@ -16,6 +16,6 @@ class HttpClient {
     HttpClient ();
     ~HttpClient ();
     
-    int DownloadFile (const std::string& url, const std::string& outputFile);
-    int SendPostRequest(const std::string& url, const json& body);
+    bool DownloadFile (const std::string& url, const std::string& outputFile);
+    bool SendPostRequest(const std::string& url, const json& body);
 };

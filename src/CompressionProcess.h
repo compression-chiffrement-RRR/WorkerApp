@@ -8,7 +8,7 @@ class CompressionProcess : public Process {
 
     CompressionProcess(ProcessType alg);
 
-    bool Execute(string filePath, string outputPath);
+    bool Execute(string& filePath, string& outputPath);
 
     private:
 

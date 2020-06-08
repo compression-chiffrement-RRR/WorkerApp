@@ -26,7 +26,7 @@ EncryptionProcess::EncryptionProcess(EncryptionOperation op, AESKeySize size, AE
     this->aes->SetIv(iv.data());
 }
 
-bool EncryptionProcess::Execute(string filePath, string outputPath){
+bool EncryptionProcess::Execute(string& filePath, string& outputPath){
     
     switch (this->op){
         case EncryptionOperation::ENCRYPT:

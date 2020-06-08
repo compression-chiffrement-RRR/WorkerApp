@@ -32,6 +32,9 @@ TEST(AESTest, EncryptAndDecrypt_ECB_128){
     };
 
     uint8_t *expectedPlaintext = new uint8_t[sizeof(input)];
+
+    if (expectedPlaintext == nullptr)
+        FAIL();
     
     memcpy(expectedPlaintext, input, sizeof(input));
 
@@ -75,6 +78,9 @@ TEST(AESTest, EncryptAndDecrypt_ECB_192){
     };
 
     uint8_t *expectedPlaintext = new uint8_t[sizeof(input)];
+
+    if (expectedPlaintext == nullptr)
+        FAIL();
     
     memcpy(expectedPlaintext, input, sizeof(input));
 
@@ -120,6 +126,9 @@ TEST(AESTest, EncryptAndDecrypt_ECB_256){
     };
 
     uint8_t *expectedPlaintext = new uint8_t[sizeof(input)];
+
+    if (expectedPlaintext == nullptr)
+        FAIL();
     
     memcpy(expectedPlaintext, input, sizeof(input));
 
@@ -168,6 +177,9 @@ TEST(AESTest, EncryptAndDecrypt_CBC_128){
     };
 
     uint8_t *expectedPlaintext = new uint8_t[sizeof(input)];
+
+    if (expectedPlaintext == nullptr)
+        FAIL();
     
     memcpy(expectedPlaintext, input, sizeof(input));
 
@@ -194,13 +206,6 @@ TEST(AESTest, EncryptAndDecrypt_File_CBC_128){
         0xba, 0x29, 0x03, 0x49
     };
 
-    uint8_t iv [] = {
-        0x8c, 0xe8, 0x2e, 0xef, 
-        0xbe, 0xa0, 0xda, 0x3c, 
-        0x44, 0x69, 0x9e, 0xd7, 
-        0xdb, 0x51, 0xb7, 0xd9
-    };
-
     const string original = "/root/tests/testfiles/lorem.txt";
     const string encrypted = "/root/tests/testfiles/lorem.enc.txt";
     const string decrypted = "/root/tests/testfiles/lorem.dec.txt";
@@ -213,6 +218,6 @@ TEST(AESTest, EncryptAndDecrypt_File_CBC_128){
 
     ASSERT_EQ(0, aes.DecryptFile(encrypted, decrypted));
 
-    remove(encrypted.c_str());
-    remove(decrypted.c_str());
+    ASSERT_EQ(0, remove(encrypted.c_str()));
+    ASSERT_EQ(0, remove(decrypted.c_str()));
 }

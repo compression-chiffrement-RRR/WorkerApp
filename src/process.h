@@ -86,6 +86,6 @@ class Process {
         throw runtime_error(string("Unknown process name."));
     };
 
-    virtual bool Execute(string filePath, string outputPath) = 0;
+    virtual bool Execute(string& filePath, string& outputPath) = 0;
 
 };
