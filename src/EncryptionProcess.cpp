@@ -3,7 +3,7 @@
 #include <memory>
 
 void EncryptionProcess::Init(EncryptionOperation op, AESKeySize size, AESMode mode, vector<uint8_t> key){
-    if ((long unsigned int)size / 8 != key.size()){
+    if ((size_t)(size / 8) != key.size()){
         throw runtime_error("Invalid key size."); 
     }
 

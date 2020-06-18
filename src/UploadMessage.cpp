@@ -93,7 +93,7 @@ UploadMessage::UploadMessage (json& body){
             switch (type){
 
                 case ProcessType::ENCRYPT_AES_128_ECB:
-                    this->processes.push_back(make_shared<EncryptionProcess>(
+                    this->processes.push_back(make_unique<EncryptionProcess>(
                         EncryptionOperation::ENCRYPT,
                         AESKeySize::AES_128, 
                         AESMode::ECB, 
@@ -102,7 +102,7 @@ UploadMessage::UploadMessage (json& body){
                     break;
 
                 case ProcessType::ENCRYPT_AES_192_ECB:
-                    this->processes.push_back(make_shared<EncryptionProcess>(
+                    this->processes.push_back(make_unique<EncryptionProcess>(
                         EncryptionOperation::ENCRYPT,
                         AESKeySize::AES_192, 
                         AESMode::ECB, 
@@ -111,7 +111,7 @@ UploadMessage::UploadMessage (json& body){
                     break;
                     
                 case ProcessType::ENCRYPT_AES_256_ECB:
-                    this->processes.push_back(make_shared<EncryptionProcess>(
+                    this->processes.push_back(make_unique<EncryptionProcess>(
                         EncryptionOperation::ENCRYPT,
                         AESKeySize::AES_256, 
                         AESMode::ECB, 
@@ -120,7 +120,7 @@ UploadMessage::UploadMessage (json& body){
                     break;
 
                 case ProcessType::DECRYPT_AES_128_ECB:
-                    this->processes.push_back(make_shared<EncryptionProcess>(
+                    this->processes.push_back(make_unique<EncryptionProcess>(
                         EncryptionOperation::DECRYPT,
                         AESKeySize::AES_128, 
                         AESMode::ECB, 
@@ -129,7 +129,7 @@ UploadMessage::UploadMessage (json& body){
                     break;
 
                 case ProcessType::DECRYPT_AES_192_ECB:
-                    this->processes.push_back(make_shared<EncryptionProcess>(
+                    this->processes.push_back(make_unique<EncryptionProcess>(
                         EncryptionOperation::DECRYPT,
                         AESKeySize::AES_192, 
                         AESMode::ECB, 
@@ -138,7 +138,7 @@ UploadMessage::UploadMessage (json& body){
                     break;
 
                 case ProcessType::DECRYPT_AES_256_ECB:
-                    this->processes.push_back(make_shared<EncryptionProcess>(
+                    this->processes.push_back(make_unique<EncryptionProcess>(
                         EncryptionOperation::DECRYPT,
                         AESKeySize::AES_256, 
                         AESMode::ECB, 
@@ -147,7 +147,7 @@ UploadMessage::UploadMessage (json& body){
                     break;
 
                 case ProcessType::ENCRYPT_AES_128_CBC:
-                    this->processes.push_back(make_shared<EncryptionProcess>(
+                    this->processes.push_back(make_unique<EncryptionProcess>(
                         EncryptionOperation::ENCRYPT,
                         AESKeySize::AES_128, 
                         AESMode::CBC, 
@@ -157,7 +157,7 @@ UploadMessage::UploadMessage (json& body){
                     break;
 
                 case ProcessType::ENCRYPT_AES_192_CBC:
-                    this->processes.push_back(make_shared<EncryptionProcess>(
+                    this->processes.push_back(make_unique<EncryptionProcess>(
                         EncryptionOperation::ENCRYPT,
                         AESKeySize::AES_192, 
                         AESMode::CBC, 
@@ -167,7 +167,7 @@ UploadMessage::UploadMessage (json& body){
                     break;
                     
                 case ProcessType::ENCRYPT_AES_256_CBC:
-                    this->processes.push_back(make_shared<EncryptionProcess>(
+                    this->processes.push_back(make_unique<EncryptionProcess>(
                         EncryptionOperation::ENCRYPT,
                         AESKeySize::AES_256, 
                         AESMode::CBC, 
@@ -177,7 +177,7 @@ UploadMessage::UploadMessage (json& body){
                     break;
 
                 case ProcessType::DECRYPT_AES_128_CBC:
-                    this->processes.push_back(make_shared<EncryptionProcess>(
+                    this->processes.push_back(make_unique<EncryptionProcess>(
                         EncryptionOperation::DECRYPT,
                         AESKeySize::AES_128, 
                         AESMode::CBC, 
@@ -187,7 +187,7 @@ UploadMessage::UploadMessage (json& body){
                     break;
 
                 case ProcessType::DECRYPT_AES_192_CBC:
-                    this->processes.push_back(make_shared<EncryptionProcess>(
+                    this->processes.push_back(make_unique<EncryptionProcess>(
                         EncryptionOperation::DECRYPT,
                         AESKeySize::AES_192, 
                         AESMode::CBC, 
@@ -197,7 +197,7 @@ UploadMessage::UploadMessage (json& body){
                     break;
 
                 case ProcessType::DECRYPT_AES_256_CBC:
-                    this->processes.push_back(make_shared<EncryptionProcess>(
+                    this->processes.push_back(make_unique<EncryptionProcess>(
                         EncryptionOperation::DECRYPT,
                         AESKeySize::AES_256, 
                         AESMode::CBC, 
@@ -206,12 +206,12 @@ UploadMessage::UploadMessage (json& body){
                     );
                     break;
 
-                case ProcessType::COMPRESS_LZ78:
-                    this->processes.push_back(make_shared<CompressionProcess>(ProcessType::COMPRESS_LZ78));
+                case ProcessType::COMPRESS_HUFFMAN:
+                    this->processes.push_back(make_unique<CompressionProcess>(ProcessType::COMPRESS_HUFFMAN));
                     break;
 
-                case ProcessType::DECOMPRESS_LZ78:
-                    this->processes.push_back(make_shared<CompressionProcess>(ProcessType::DECOMPRESS_LZ78));
+                case ProcessType::DECOMPRESS_HUFFMAN:
+                    this->processes.push_back(make_unique<CompressionProcess>(ProcessType::DECOMPRESS_HUFFMAN));
                     break;
             }
 
@@ -238,11 +238,11 @@ void UploadMessage::Treat (){
         return;
     }
 
-    for (const shared_ptr<Process> p: this->processes){
+    for (size_t i = 0; i < processes.size(); i ++){
         
         newTmpPath = RandomTmpFilename(20);
         
-        if (!p->Execute(tmpPath, newTmpPath)){
+        if (!processes[i]->Execute(tmpPath, newTmpPath)){
             string error = string("Failed to process file ") + tmpPath;
             cout << error << endl;
             this->Fail(error);

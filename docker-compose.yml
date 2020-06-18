@@ -23,7 +23,6 @@ services:
             WORKER_APP_RABBITMQ_QUEUE: incoming_uploads
             WORKER_APP_RABBITMQ_USERNAME: worker
             WORKER_APP_RABBITMQ_PASSWORD: worker
-            WORKER_APP_API_DOMAIN: localhost
         volumes:
             - E:\dev\WorkerApp:/root
         restart: always

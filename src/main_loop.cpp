@@ -15,7 +15,7 @@ using namespace std;
 using namespace AmqpClient;
 using json = nlohmann::json;
 
-void MessageThreadRoutine (shared_ptr<UploadMessage> msg){
+void MessageThreadRoutine (std::unique_ptr<UploadMessage> msg){
     msg->Treat();
 }
 
@@ -67,7 +67,7 @@ void MainLoop(){
             json body = json::parse(envelope->Message()->Body());
             thread t (
                 MessageThreadRoutine, 
-                make_shared<UploadMessage>(body));
+                make_unique<UploadMessage>(body));
             t.detach();
         } 
         

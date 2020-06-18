@@ -206,6 +206,13 @@ TEST(AESTest, EncryptAndDecrypt_File_CBC_128){
         0xba, 0x29, 0x03, 0x49
     };
 
+    uint8_t iv [] = { 
+        0x56, 0xe4, 0x7a, 0x38, 
+        0xc5, 0x59, 0x89, 0x74, 
+        0xbc, 0x46, 0x90, 0x3d, 
+        0xba, 0x29, 0x03, 0x49
+    };
+
     const string original = "/root/tests/testfiles/lorem.txt";
     const string encrypted = "/root/tests/testfiles/lorem.enc.txt";
     const string decrypted = "/root/tests/testfiles/lorem.dec.txt";

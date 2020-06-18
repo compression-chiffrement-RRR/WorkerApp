@@ -15,7 +15,7 @@ class UploadMessage {
     string fileUrl;
     string responseUrl;
     string fileID;
-    vector<shared_ptr<Process>> processes;
+    vector<unique_ptr<Process>> processes;
 
     public:
 

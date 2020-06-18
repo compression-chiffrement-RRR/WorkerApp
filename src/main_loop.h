@@ -4,4 +4,4 @@
 #include "UploadMessage.h"
 
 void MainLoop();
-void TreatMessageThreadRoutine (shared_ptr<UploadMessage> msg);
+void TreatMessageThreadRoutine (std::unique_ptr<UploadMessage> msg);
