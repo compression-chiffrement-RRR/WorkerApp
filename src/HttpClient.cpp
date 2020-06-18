@@ -113,3 +113,17 @@ clean:
     return ret;
  
 };
+
+bool UploadFile(const std::string& url, const std::string& fileName){
+
+    bool ret = false;
+
+    
+
+
+    ret = true;
+
+clean:
+
+    return ret;
+};

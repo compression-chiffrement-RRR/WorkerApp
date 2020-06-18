@@ -57,6 +57,14 @@ UploadMessage::UploadMessage (json& body){
 
     this->fileUrl = body["fileUrl"];
 
+    if (!body["uploadUrl"].is_string()){
+        string error = "\"uploadUrl\" must be a string.";
+        this->Fail(error);
+        throw runtime_error(error);
+    }
+
+    this->uploadUrl = body["uploadUrl"];
+
     if (!body["fileID"].is_string()){
         string error = "\"fileID\" must be a string.";
         this->Fail(error);
@@ -207,11 +215,11 @@ UploadMessage::UploadMessage (json& body){
                     break;
 
                 case ProcessType::COMPRESS_HUFFMAN:
-                    this->processes.push_back(make_unique<CompressionProcess>(ProcessType::COMPRESS_HUFFMAN));
+                    this->processes.push_back(make_unique<CompressionProcess>(CompressionOperation::OPERATION_COMPRESS_HUFFMAN));
                     break;
 
                 case ProcessType::DECOMPRESS_HUFFMAN:
-                    this->processes.push_back(make_unique<CompressionProcess>(ProcessType::DECOMPRESS_HUFFMAN));
+                    this->processes.push_back(make_unique<CompressionProcess>(CompressionOperation::OPERATION_DECOMPRESS_HUFFMAN));
                     break;
             }
 
