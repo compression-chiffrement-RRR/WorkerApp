@@ -1,0 +1,19 @@
+name: Deploy worker app
+
+runs-on: self-hosted
+
+on:
+    push:
+        branches: [ master ]
+    pull_request:
+        branches: [ master ]
+
+jobs:
+    build:
+        - uses: actions/checkout@v2
+        - name: Build and push image to private repository
+            uses: docker/build-push-action@v1
+            with:
+                registry: localhost:5000
+                repository: cyphernet/worker-app
+                tag_with_ref: true

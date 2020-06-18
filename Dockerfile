@@ -1,5 +1,8 @@
 FROM gcc:latest
 
+COPY ./ /root
+RUN rm -rf /root/debug /root/release /root/tests/bin
+
 # Install cmake, google C++ test, libcurl4 
 RUN apt-get -y update
 RUN apt-get -y install gdb cmake googletest libcurl4 nlohmann-json3-dev
@@ -40,10 +43,7 @@ WORKDIR /usr/src/googletest/
 RUN cmake . && make install
 
 WORKDIR /root
-RUN echo "#!/bin/bash\n\
-    set -e\n\
-    cd /root\n\
-    make release\n\
-    ./release/workerapp" > /usr/local/bin/start.sh && chmod 700 /usr/local/bin/start.sh
 
-CMD [ "/usr/local/bin/start.sh" ]
+RUN make test && make release && chmod 500 /root/release/workerapp
+
+CMD [ "/root/release/workerapp" ]

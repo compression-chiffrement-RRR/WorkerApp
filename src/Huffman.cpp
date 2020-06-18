@@ -210,7 +210,7 @@ void Huffman::Decompress(uint8_t *bytes, size_t *length, uint8_t *output){
 void Huffman::ExtractDictionnary(uint8_t *buffer, size_t length){
 
     if (length % sizeof(SerializedNode) != 0 || length == 0){
-        throw runtime_error("Bad dictionnary format.");
+        return;
     }
 
     SerializedNode *n = (SerializedNode *) buffer;
