@@ -267,11 +267,9 @@ void UploadMessage::Treat (){
         tmpPath = newTmpPath;
     }
 
-    string finalPath = string("/tmp") + string("/") + this->fileID;
 
-    if (rename(tmpPath.c_str(), finalPath.c_str()) != 0){
-        
-        string error = string("Failed to rename temp file ") + tmpPath +  string(" to ") + finalPath;
+    if (http.UploadFile(this->uploadUrl, tmpPath) != true){
+        string error = string("Couldn't upload processed file to ") + this->uploadUrl;
         cout << error << endl;
         this->Fail(error);
         return;
