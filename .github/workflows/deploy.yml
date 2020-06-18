@@ -14,6 +14,6 @@ jobs:
         - name: Build and push image to private repository
         uses: docker/build-push-action@v1
         with:
-        registry: localhost:5000
-        repository: cyphernet/worker-app
-        tag_with_ref: true
+            registry: localhost:5000
+            repository: cyphernet/worker-app
+            tag_with_ref: true
