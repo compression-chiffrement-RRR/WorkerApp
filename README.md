@@ -30,8 +30,9 @@ The messages to be received by the worker look like this:
 ```
 { 
 	"fileUrl": "https://www.w3.org/TR/PNG/iso_8859-1.txt", 
-	"responseUrl": "http://mydomain.com/whereToReceiveResponseData",
-	"fileID": "TheFinalFileName",
+	"fileUrl": "http://mys3bucket.com/where/to/upload/the/processed/file", 
+	"responseUrl": "http://mydomain.com/where/to/receive/response/data",
+	"fileID": "c9759f96-2a0d-4596-8c59-c4081c0bdb3b ",
 	"processes": [
 		{
 			"type": "ENCRYPT_AES_128_ECB",
@@ -45,11 +46,13 @@ The messages to be received by the worker look like this:
 }
 ```
 
-The `fileUrl` property is the file URL to download from the API.
+The `fileUrl` property is the URL of the file to be downloaded from the API.
+
+The `uploadUrl` property is the URL to be used for uploading the file after processing (will be using PUT).
 
 The `responseUrl` property is the API URL to be used for sending a success/error message when message has been processed.
 
-The `fileID` property is the name of the file to be written after processing.
+The `fileID` the ID of the file, it will be contained in the after-processing response to the API.
 
 The `processes` is an array of processes objects. A process object has at least one string property which is `type`, it tells the worker what kind of process we should apply.
 
@@ -130,7 +133,7 @@ It will contain the following JSON on success:
 
 ```
 {
-  "fileID": "TheFinalFileName",
+  "fileID": "c9759f96-2a0d-4596-8c59-c4081c0bdb3b ",
   "success": true
 }
 ```
@@ -140,7 +143,7 @@ If something wrong happened:
 ```
 {
   "error": "DERYPT_AES_128_CBC is not a valid process type.",
-  "fileID": "TheFinalFileName",
+  "fileID": "c9759f96-2a0d-4596-8c59-c4081c0bdb3b ",
   "success": false
 }
 ```
