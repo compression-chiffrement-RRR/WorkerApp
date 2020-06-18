@@ -8,13 +8,18 @@ RUN apt-get -y update
 RUN apt-get -y install gdb cmake googletest libcurl4 nlohmann-json3-dev
 
 # Install Boost (SimpleAmqpClient dependency)
-WORKDIR /var/tmp
-RUN wget https://dl.bintray.com/boostorg/release/1.73.0/source/boost_1_73_0.tar.bz2 && \
-    tar --bzip2 -xf boost_1_73_0.tar.bz2
+#WORKDIR /var/tmp
+#RUN wget https://dl.bintray.com/boostorg/release/1.73.0/source/boost_1_73_0.tar.bz2 && \
+#    tar --bzip2 -xf boost_1_73_0.tar.bz2
 
-WORKDIR /var/tmp/boost_1_73_0
-RUN ./bootstrap.sh && \
-    ./b2 install || true
+# WORKDIR /var/tmp/boost_1_73_0
+#RUN ./bootstrap.sh && \
+#    ./b2 install || true
+
+RUN update-alternatives --install /usr/bin/gfortran gfortran /usr/local/bin/gfortran 999
+
+RUN apt-get install -y libcoarrays-openmpi-dev:amd64 libcoarrays-dev:amd64 gfortran
+RUN apt-get -y install --reinstall libboost-all-dev libboost-chrono1.67.0 libboost-chrono1.67-dev
 
 # Install rabbitmq-c (SimpleAmqpClient dependency)
 WORKDIR /var/tmp
