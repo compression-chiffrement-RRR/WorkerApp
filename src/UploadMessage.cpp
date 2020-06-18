@@ -236,6 +236,8 @@ UploadMessage::~UploadMessage(){};
 
 void UploadMessage::Treat (){
 
+    
+
     HttpClient http;
     string tmpPath = RandomTmpFilename(20), newTmpPath;
     

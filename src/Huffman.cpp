@@ -244,8 +244,15 @@ bool Huffman::CompressFile(const std::string& inputPath, const std::string& outp
     in.open(inputPath, std::ifstream::binary);
     out.open(outputPath, std::ofstream::binary|std::ofstream::trunc);
 
-    if (!in.is_open() || !out.is_open())
+    if (!in.is_open()){
+        std::cout << "Failed to open input file for Huffman compression." << std::endl;
         goto clean;
+    }
+
+    if (!out.is_open()){
+        std::cout << "Failed to open output file for Huffman compression." << std::endl;
+        goto clean;
+    }
 
     this->Init();
     
@@ -253,8 +260,10 @@ bool Huffman::CompressFile(const std::string& inputPath, const std::string& outp
         
         in.read((char *)buffer, HUFFMAN_READ_BUFFER_SIZE);
 
-        if (in.bad() || (in.fail() && !in.eof()))
+        if (in.bad() || (in.fail() && !in.eof())){
+            std::cout << "Could not read input data for compression." << std::endl;
             goto clean;
+        }
         
         this->UpdateOccurences(buffer, (size_t)in.gcount());
     }
@@ -267,46 +276,60 @@ bool Huffman::CompressFile(const std::string& inputPath, const std::string& outp
     in.clear();
     in.seekg(0);
     
-    if (in.fail() || in.bad())
+    if (in.fail() || in.bad()){
+        std::cout << "Couldn not seek start of file for compression." << std::endl;
         goto clean;
+    }
 
     while (!in.eof()){
         
         in.read((char *)buffer, HUFFMAN_READ_BUFFER_SIZE);
 
-        if (in.bad() || (in.fail() && !in.eof()))
+        if (in.bad() || (in.fail() && !in.eof())){
+            std::cout << "Could not read input data." << std::endl;
             goto clean;
+        }
 
         read = in.gcount();
 
         this->Compress(buffer, &read);
 
         out.write((char *)buffer, read);
-        if (out.bad() || out.fail())
+        if (out.bad() || out.fail()){
+            std::cout << "Could not write compressed data." << std::endl;
             goto clean;
+        }
     }
 
     this->CompressFinalize(buffer, &read);
 
     if (read > 0){
         out.write((char *)buffer, read);
-        if (out.bad() || out.fail())
+        if (out.bad() || out.fail()){
+            std::cout << "IO error during compression (write)." << std::endl;
             goto clean;
+        }
     }
 
     out.write((char *)&(this->encodedBits), sizeof(this->encodedBits));
-    if (out.bad() || out.fail())
+    if (out.bad() || out.fail()){
+        std::cout << "Couldn't write encodedBits value." << std::endl;
         goto clean;
+    }
 
     sizeOfDictionnary = this->rawDictionnary.size() * sizeof(SerializedNode);
 
     out.write((char *)this->rawDictionnary.data(), sizeOfDictionnary);
-    if (out.bad() || out.fail())
+    if (out.bad() || out.fail()){
+        std::cout << "Couldn't write Huffman dictionnary data." << std::endl;
         goto clean;
+    }
 
     out.write((char *)&sizeOfDictionnary, sizeof(sizeOfDictionnary));
-    if (out.bad() || out.fail())
+    if (out.bad() || out.fail()){
+        std::cout << "Couldn't write size of Huffman dictionnary." << std::endl;
         goto clean;
+    }
 
     ret = true;
 

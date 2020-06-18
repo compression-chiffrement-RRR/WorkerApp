@@ -16,8 +16,9 @@ using namespace AmqpClient;
 using json = nlohmann::json;
 
 void MessageThreadRoutine (std::unique_ptr<UploadMessage> msg){
+    cout << "Thread started for message with fileID = " << msg->fileID << endl;
     msg->Treat();
-}
+};
 
 void MainLoop(){
 
@@ -64,7 +65,9 @@ void MainLoop(){
         channel->BasicConsumeMessage(consumerTag, envelope);
 
         try {
+            cout << "Message received. Parsing JSON..." << endl;
             json body = json::parse(envelope->Message()->Body());
+            cout << body << endl;
             thread t (
                 MessageThreadRoutine, 
                 make_unique<UploadMessage>(body));
@@ -76,4 +79,4 @@ void MainLoop(){
         }
 
     }
-}
+};
