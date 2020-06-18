@@ -30,7 +30,7 @@ The messages to be received by the worker look like this:
 ```
 { 
 	"fileUrl": "https://www.w3.org/TR/PNG/iso_8859-1.txt", 
-	"fileUrl": "http://mys3bucket.com/where/to/upload/the/processed/file", 
+	"uploadUrl": "http://mys3bucket.com/where/to/upload/the/processed/file", 
 	"responseUrl": "http://mydomain.com/where/to/receive/response/data",
 	"fileID": "c9759f96-2a0d-4596-8c59-c4081c0bdb3b ",
 	"processes": [
