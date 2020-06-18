@@ -26,7 +26,6 @@ Huffman::~Huffman (){};
 
 /* PRIVATE FUNCTIONS */
 
-
 void Huffman::Init(){
 
     for (size_t i = 0; i < 256; i++){
@@ -76,6 +75,7 @@ void Huffman::CreateDictionnary(){
     // empty dictionnary
     if (this->tmpNodes.size() == 0){
         this->dictionnary = std::make_shared<DictionnaryNode>(0);
+        this->currentNode = this->dictionnary;
         return;
     }
 
@@ -83,9 +83,10 @@ void Huffman::CreateDictionnary(){
     if (this->tmpNodes.size() == 1){
         this->dictionnary = std::make_shared<DictionnaryNode>(this->tmpNodes[0]->weight);
         this->dictionnary->left = this->tmpNodes[0];
+        this->currentNode = this->dictionnary;
         return;
     } 
-    
+
     // more than two characters occuring
     while (this->tmpNodes.size() > 1){
 
@@ -172,8 +173,6 @@ void Huffman::CompressFinalize(uint8_t *buffer, size_t *length){
 
     buffer[0] = this->currentByte;
     (*length) = 1;
-
-    this->encodedBits += this->encodedBits % 8;
 };
 
 void Huffman::Decompress(uint8_t *bytes, size_t *length, uint8_t *output){
@@ -297,19 +296,17 @@ bool Huffman::CompressFile(const std::string& inputPath, const std::string& outp
 
     out.write((char *)&(this->encodedBits), sizeof(this->encodedBits));
     if (out.bad() || out.fail())
-            goto clean;
+        goto clean;
 
     sizeOfDictionnary = this->rawDictionnary.size() * sizeof(SerializedNode);
 
-    if (sizeOfDictionnary){
-        out.write((char *)this->rawDictionnary.data(), sizeOfDictionnary);
-        if (out.bad() || out.fail())
-                goto clean;
-    }
+    out.write((char *)this->rawDictionnary.data(), sizeOfDictionnary);
+    if (out.bad() || out.fail())
+        goto clean;
 
     out.write((char *)&sizeOfDictionnary, sizeof(sizeOfDictionnary));
     if (out.bad() || out.fail())
-            goto clean;
+        goto clean;
 
     ret = true;
 
