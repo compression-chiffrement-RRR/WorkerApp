@@ -18,5 +18,5 @@ jobs:
       uses: docker/build-push-action@v1
       with:
         registry: localhost:5000
-        repository: cyphernet/worker-app:latest
-        tag_with_ref: false
+        repository: cyphernet/worker-app
+        tags: latest
