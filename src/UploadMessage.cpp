@@ -279,7 +279,14 @@ void UploadMessage::Treat (){
         return;
     }
 
+    if (remove(tmpPath.c_str()) != 0){
+        string error = string("Failed to remove temp file ") + tmpPath;
+        cout << error << endl;
+    }
+
     this->Success();
+
+    cout << "Successfully processed file " << this->fileID << endl;
 }
 
 void UploadMessage::Success(){
@@ -313,7 +320,6 @@ void UploadMessage::Fail(string& error){
 
 
 bool UploadMessage::SendResponse (json& body){
-
     HttpClient client;
     return client.SendPostRequest(this->responseUrl, body);
 }

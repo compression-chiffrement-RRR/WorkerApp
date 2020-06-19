@@ -13,6 +13,10 @@ static size_t UploadFile_ReadDataCallback(void *ptr, size_t size, size_t nmemb, 
 
 HttpClient::HttpClient (){
     this->curl = curl_easy_init();
+
+    if (this->curl != NULL){
+        curl_easy_setopt (this->curl, CURLOPT_VERBOSE, 0L);
+    }
 };
 
 HttpClient::~HttpClient (){
