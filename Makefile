@@ -17,7 +17,7 @@ TESTS := $(wildcard tests/*.cpp)
 #
 CC     := g++
 CFLAGS := -std=c++17 -Wall -Werror -Wextra
-CLIBS := -lSimpleAmqpClient -lcurl -lpthread
+CLIBS := -lstdc++fs -lSimpleAmqpClient -lcurl -lpthread
 EXE  := workerapp
 
 #
@@ -52,7 +52,7 @@ all: prepare release debug
 debug: prepare $(DBGEXE)
 
 $(DBGEXE): $(SRCS)
-	$(CC) $(CFLAGS) $(DBGCFLAGS) $(CLIBS) -o $(DBGEXE) $^
+	$(CC) $(CFLAGS) $(DBGCFLAGS) -o $(DBGEXE) $^ $(CLIBS)
 
 #
 # Release
@@ -60,7 +60,7 @@ $(DBGEXE): $(SRCS)
 release: prepare $(RELEXE)
 
 $(RELEXE): $(SRCS) 
-	$(CC) $(CFLAGS) $(RELCFLAGS) $(CLIBS) -o $(RELEXE) $^
+	$(CC) $(CFLAGS) $(RELCFLAGS) -o $(RELEXE) $^ $(CLIBS)
 
 #
 # Tests
@@ -69,7 +69,7 @@ test: prepare $(TESTEXE)
 	$(TESTEXE)
 
 $(TESTEXE): $(TESTS) $(SRCS) 
-	$(CC) $(CFLAGS) $(TESTCFLAGS) $(CLIBS) -o $(TESTEXE) $(filter-out src/main.cpp, $^)
+	$(CC) $(CFLAGS) $(TESTCFLAGS) -o $(TESTEXE) $(filter-out src/main.cpp, $^) $(CLIBS)
 
 #
 # Other rules
