@@ -19,4 +19,4 @@ jobs:
       with:
         registry: localhost:5000
         repository: cyphernet/worker-app:latest
-        tag_with_ref: true
+        tag_with_ref: false
