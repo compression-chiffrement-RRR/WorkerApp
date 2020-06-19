@@ -42,6 +42,7 @@ void Huffman::Init(){
     this->dictionnary = nullptr;
     this->currentNode = nullptr;
     this->currentByte = 0b00000000;
+
 };
 
 void Huffman::UpdateOccurences(uint8_t *buffer, size_t length){
@@ -99,8 +100,8 @@ void Huffman::CreateDictionnary(){
             this->tmpNodes[lastIndex]->weight + this->tmpNodes[lastIndex - 1]->weight
         );
 
-        newNode->left = this->tmpNodes[lastIndex - 1];
-        newNode->right = this->tmpNodes[lastIndex];
+        newNode->left = this->tmpNodes[lastIndex];
+        newNode->right = this->tmpNodes[lastIndex - 1];
 
         this->tmpNodes.pop_back();
         this->tmpNodes.pop_back();
@@ -135,33 +136,32 @@ void Huffman::GetCodes(std::shared_ptr<DictionnaryNode> node, std::vector<Direct
     }
 };
 
-void Huffman::Compress(uint8_t *bytes, size_t *length){
+void Huffman::Compress(uint8_t *input, size_t *length, uint8_t *output){
 
-    size_t writtenBytes = 0;
+    size_t originalLength = (*length);
+    (*length) = 0;
 
-    for (size_t i = 0; i < (*length); i ++){
+    for (size_t i = 0; i < originalLength; i ++){
 
-        std::vector<Direction> code = this->codesMap[bytes[i]];
+        std::vector<Direction> code = this->codesMap[input[i]];
 
         for (Direction bit: code){
 
             if (bit == Direction::LEFT){
-                this->currentByte += (0b10000000 >> (this->encodedBits % 8));
+                this->currentByte |= (0b10000000 >> (this->encodedBits % 8));
             }
 
             this->encodedBits++;
 
             if (this->encodedBits % 8 == 0){
                 
-                bytes[writtenBytes] = this->currentByte;
-                writtenBytes++;
-                
+                output[(*length)] = this->currentByte;
+                (*length)++;
+
                 this->currentByte = 0b00000000;
             }
         }
     }
-
-    (*length) = writtenBytes;
 };
 
 void Huffman::CompressFinalize(uint8_t *buffer, size_t *length){
@@ -195,8 +195,10 @@ void Huffman::Decompress(uint8_t *bytes, size_t *length, uint8_t *output){
             }
 
             if (this->currentNode->left == nullptr && this->currentNode->right == nullptr){
+
                 output[bytesWritten] = this->currentNode->value;
                 bytesWritten++;
+
                 this->currentNode = dictionnary;
             }
 
@@ -224,7 +226,7 @@ void Huffman::ExtractDictionnary(uint8_t *buffer, size_t length){
 
 /* PUBLIC FUNCTIONS */
 
-#define HUFFMAN_READ_BUFFER_SIZE 8192 * 64
+#define HUFFMAN_BUFFER_SIZE 8192 * 64
 
 bool Huffman::CompressFile(const std::string& inputPath, const std::string& outputPath){
 
@@ -233,24 +235,25 @@ bool Huffman::CompressFile(const std::string& inputPath, const std::string& outp
 
     bool ret = false;
 
-    uint8_t *buffer = nullptr;
+    uint8_t *buffer = nullptr, *output = nullptr;
     size_t read = 0, sizeOfDictionnary = 0;
 
-    buffer = new uint8_t[HUFFMAN_READ_BUFFER_SIZE];
+    buffer = new uint8_t[HUFFMAN_BUFFER_SIZE];
+    output = new uint8_t[HUFFMAN_BUFFER_SIZE];
 
-    if (buffer == nullptr)
+    if (buffer == nullptr || output == nullptr)
         goto clean;
 
     in.open(inputPath, std::ifstream::binary);
     out.open(outputPath, std::ofstream::binary|std::ofstream::trunc);
 
     if (!in.is_open()){
-        std::cout << "Failed to open input file for Huffman compression." << std::endl;
+        std::cout << "Failed to open input file" << inputPath << " for Huffman compression." << std::endl;
         goto clean;
     }
 
     if (!out.is_open()){
-        std::cout << "Failed to open output file for Huffman compression." << std::endl;
+        std::cout << "Failed to open output file " << outputPath << " for Huffman compression." << std::endl;
         goto clean;
     }
 
@@ -258,7 +261,7 @@ bool Huffman::CompressFile(const std::string& inputPath, const std::string& outp
     
     while (!in.eof()){
         
-        in.read((char *)buffer, HUFFMAN_READ_BUFFER_SIZE);
+        in.read((char *)buffer, HUFFMAN_BUFFER_SIZE);
 
         if (in.bad() || (in.fail() && !in.eof())){
             std::cout << "Could not read input data for compression." << std::endl;
@@ -267,7 +270,6 @@ bool Huffman::CompressFile(const std::string& inputPath, const std::string& outp
         
         this->UpdateOccurences(buffer, (size_t)in.gcount());
     }
-
 
     this->CreateTempNodes();
     this->CreateDictionnary();
@@ -283,7 +285,7 @@ bool Huffman::CompressFile(const std::string& inputPath, const std::string& outp
 
     while (!in.eof()){
         
-        in.read((char *)buffer, HUFFMAN_READ_BUFFER_SIZE);
+        in.read((char *)buffer, HUFFMAN_BUFFER_SIZE);
 
         if (in.bad() || (in.fail() && !in.eof())){
             std::cout << "Could not read input data." << std::endl;
@@ -292,14 +294,20 @@ bool Huffman::CompressFile(const std::string& inputPath, const std::string& outp
 
         read = in.gcount();
 
-        this->Compress(buffer, &read);
+        if (read){
 
-        out.write((char *)buffer, read);
-        if (out.bad() || out.fail()){
-            std::cout << "Could not write compressed data." << std::endl;
-            goto clean;
+            this->Compress(buffer, &read, output);
+
+            out.write((char *)output, read);
+            if (out.bad() || out.fail()){
+                std::cout << "Could not write compressed data." << std::endl;
+                goto clean;
+            }
+
         }
     }
+
+    read = 0;
 
     this->CompressFinalize(buffer, &read);
 
@@ -338,6 +346,9 @@ clean:
     if (buffer != nullptr)
         delete [] buffer;
 
+    if (output != nullptr)
+        delete [] output;
+
     if (in.is_open())
         in.close();
 
@@ -362,8 +373,8 @@ bool Huffman::DecompressFile(const std::string& inputPath, const std::string& ou
 
     std::streamoff offset = 0;
 
-    buffer = new uint8_t[HUFFMAN_READ_BUFFER_SIZE];
-    output = new uint8_t[HUFFMAN_READ_BUFFER_SIZE * 8];
+    buffer = new uint8_t[HUFFMAN_BUFFER_SIZE];
+    output = new uint8_t[HUFFMAN_BUFFER_SIZE * 8];
 
     if (buffer == nullptr || output == nullptr)
         goto clean;
@@ -417,7 +428,7 @@ bool Huffman::DecompressFile(const std::string& inputPath, const std::string& ou
 
     while (!in.eof()){
         
-        in.read((char *)buffer, HUFFMAN_READ_BUFFER_SIZE);
+        in.read((char *)buffer, HUFFMAN_BUFFER_SIZE);
 
         if (in.bad() || (in.fail() && !in.eof()))
             goto clean;
@@ -425,14 +436,17 @@ bool Huffman::DecompressFile(const std::string& inputPath, const std::string& ou
         read = in.gcount();
 
         this->Decompress(buffer, &read, output);
-
-        if (read == 0){
-            break;
+        
+        if (read > 0){
+            
+            out.write((char *)output, read);
+            if (out.bad() || out.fail())
+                goto clean;
+            
+            continue;
         }
 
-        out.write((char *)output, read);
-        if (out.bad() || out.fail())
-            goto clean;
+        break;  
     }
 
     ret = true;

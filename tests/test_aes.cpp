@@ -8,6 +8,8 @@ using namespace std;
 
 #include "../src/AES.h"
 
+#include "utils.h"
+
 TEST(AESTest, EncryptAndDecrypt_ECB_128){
 
     uint8_t input [] = {
@@ -224,6 +226,8 @@ TEST(AESTest, EncryptAndDecrypt_File_CBC_128){
     aes.SetIv(iv);
 
     ASSERT_EQ(0, aes.DecryptFile(encrypted, decrypted));
+
+    ASSERT_EQ(true, compareFiles(original, decrypted));
 
     ASSERT_EQ(0, remove(encrypted.c_str()));
     ASSERT_EQ(0, remove(decrypted.c_str()));

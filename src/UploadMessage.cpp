@@ -215,11 +215,13 @@ UploadMessage::UploadMessage (json& body){
                     break;
 
                 case ProcessType::COMPRESS_HUFFMAN:
-                    this->processes.push_back(make_unique<CompressionProcess>(CompressionOperation::OPERATION_COMPRESS_HUFFMAN));
+                    this->processes.push_back(make_unique<CompressionProcess>(
+                        CompressionOperation::OPERATION_COMPRESS_HUFFMAN));
                     break;
 
                 case ProcessType::DECOMPRESS_HUFFMAN:
-                    this->processes.push_back(make_unique<CompressionProcess>(CompressionOperation::OPERATION_DECOMPRESS_HUFFMAN));
+                    this->processes.push_back(make_unique<CompressionProcess>(
+                        CompressionOperation::OPERATION_DECOMPRESS_HUFFMAN));
                     break;
             }
 
@@ -236,7 +238,7 @@ UploadMessage::~UploadMessage(){};
 
 void UploadMessage::Treat (){
 
-    
+
 
     HttpClient http;
     string tmpPath = RandomTmpFilename(20), newTmpPath;

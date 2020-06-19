@@ -14,8 +14,6 @@ RUN apt-get -y install gdb cmake googletest libcurl4 nlohmann-json3-dev
 #    ./b2 install || true
 
 RUN update-alternatives --install /usr/bin/gfortran gfortran /usr/local/bin/gfortran 999
-
-RUN apt-get install -y libcoarrays-openmpi-dev:amd64 libcoarrays-dev:amd64 gfortran
 RUN apt-get -y install --reinstall libboost-all-dev libboost-chrono1.67.0 libboost-chrono1.67-dev
 
 # Install rabbitmq-c (SimpleAmqpClient dependency)

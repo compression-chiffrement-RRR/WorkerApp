@@ -29,7 +29,6 @@ class Huffman {
     std::vector<std::shared_ptr<DictionnaryNode>> tmpNodes = {};
     std::vector<Direction> codesMap [256] = { {} };
     std::vector<SerializedNode> rawDictionnary = {};
-
     uint8_t currentByte;
 
     void Init();
@@ -38,7 +37,7 @@ class Huffman {
     void CreateTempNodes();
     void CreateDictionnary();
     void GetCodes(std::shared_ptr<DictionnaryNode> node, std::vector<Direction> code);
-    void Compress(uint8_t *bytes, size_t *length);
+    void Compress(uint8_t *bytes, size_t *length, uint8_t *output);
     void CompressFinalize(uint8_t *buffer, size_t *length);
 
     void ExtractDictionnary(uint8_t *buffer, size_t sizeOfDictionnary);

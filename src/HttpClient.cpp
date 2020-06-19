@@ -12,7 +12,6 @@ static size_t DownloadFile_WriteDataCallback(void *data, size_t size, size_t nme
 static size_t UploadFile_ReadDataCallback(void *ptr, size_t size, size_t nmemb, void *userPtr);
 
 HttpClient::HttpClient (){
-    
     this->curl = curl_easy_init();
 };
 
