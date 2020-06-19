@@ -61,23 +61,22 @@ void MainLoop(){
     // start reading messages.
     while (true){
 
-            Envelope::ptr_t envelope;
-            channel->BasicConsumeMessage(consumerTag, envelope, 1000);
+        Envelope::ptr_t envelope;
+        if (channel->BasicConsumeMessage(consumerTag, envelope, 1000)){
+            try {
 
-        try {
-
-            cout << "Message received. Parsing JSON..." << endl;
-            json body = json::parse(envelope->Message()->Body());
-            cout << body << endl;
-            thread t (
-                MessageThreadRoutine, 
-                make_unique<UploadMessage>(body));
-            t.detach();
-        } 
-        
-        catch (exception& e){
-            cout << e.what() << endl;
+                cout << "Message received. Parsing JSON..." << endl;
+                json body = json::parse(envelope->Message()->Body());
+                cout << body << endl;
+                thread t (
+                    MessageThreadRoutine, 
+                    make_unique<UploadMessage>(body));
+                t.detach();
+            } 
+            
+            catch (exception& e){
+                cout << e.what() << endl;
+            }
         }
-
     }
 };
