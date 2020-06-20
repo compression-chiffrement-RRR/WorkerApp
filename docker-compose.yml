@@ -15,7 +15,7 @@ services:
             - 5672:5672
             - 15672:15672
     worker_1:
-        image: worker_app
+        image: worker_app_dev
         container_name: worker_app_1
         environment:
             WORKER_APP_RABBITMQ_HOST: rabbitmq
@@ -23,8 +23,8 @@ services:
             WORKER_APP_RABBITMQ_QUEUE: incoming_uploads
             WORKER_APP_RABBITMQ_USERNAME: worker
             WORKER_APP_RABBITMQ_PASSWORD: worker
-        #volumes:
-        #    - E:\dev\WorkerApp:/root
+        volumes:
+            - E:\dev\WorkerApp:/root
         restart: always
     #worker_2:
     #    image: ciphernet_worker_app

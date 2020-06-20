@@ -46,7 +46,7 @@ WORKDIR /root
 RUN echo "#!/bin/bash\n\
     set -e\n\
     cd /root\n\
-    make release\n\
-    ./release/workerapp" > /usr/local/bin/start.sh && chmod 700 /usr/local/bin/start.sh
+    make debug\n\
+    ./debug/workerapp" > /usr/local/bin/start.sh && chmod 700 /usr/local/bin/start.sh
 
 CMD [ "/usr/local/bin/start.sh" ]

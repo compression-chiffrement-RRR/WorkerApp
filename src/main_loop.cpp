@@ -62,7 +62,8 @@ void MainLoop(){
     while (true){
 
         Envelope::ptr_t envelope;
-        channel->BasicConsumeMessage(consumerTag, envelope);
+        if (channel->BasicConsumeMessage(consumerTag, envelope, 10000) != true)
+            continue;
             
         try {
 
