@@ -8,10 +8,11 @@
 
 using namespace std;
 
-static size_t DownloadFile_WriteDataCallback(void *data, size_t size, size_t nmemb, void *userPtr);
-static size_t UploadFile_ReadDataCallback(void *ptr, size_t size, size_t nmemb, void *userPtr);
+ size_t DownloadFile_WriteDataCallback(void *data, size_t size, size_t nmemb, void *userPtr);
+ size_t UploadFile_ReadDataCallback(void *ptr, size_t size, size_t nmemb, void *userPtr);
 
 HttpClient::HttpClient (){
+
     this->curl = curl_easy_init();
 
     if (this->curl != NULL){
@@ -25,7 +26,7 @@ HttpClient::~HttpClient (){
         curl_easy_cleanup(this->curl);
 };
 
-static size_t DownloadFile_WriteDataCallback(void *data, size_t size, size_t nmemb, void *userPtr){
+ size_t DownloadFile_WriteDataCallback(void *data, size_t size, size_t nmemb, void *userPtr){
 
     ofstream *outFile = (ofstream *)userPtr;
 
@@ -44,7 +45,7 @@ static size_t DownloadFile_WriteDataCallback(void *data, size_t size, size_t nme
     return size * nmemb;
 }
 
-static size_t UploadFile_ReadDataCallback(void *data, size_t size, size_t nmemb, void *userPtr){
+ size_t UploadFile_ReadDataCallback(void *data, size_t size, size_t nmemb, void *userPtr){
 
     ifstream *inFile = (ifstream *)userPtr;
 
@@ -79,7 +80,7 @@ bool HttpClient::DownloadFile(const string& url, const string& outputFile){
         goto clean;
     }
 
-    curl_easy_setopt(this->curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(this->curl, CURLOPT_URL, (char *)url.c_str());
 
     curl_easy_setopt(this->curl, CURLOPT_FOLLOWLOCATION, 1L);
     
@@ -124,7 +125,7 @@ bool HttpClient::SendPostRequest(const std::string& url, const json& body){
         goto clean;
     }
     
-    curl_easy_setopt(this->curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(this->curl, CURLOPT_URL, (char *)url.c_str());
 
     curl_easy_setopt(this->curl, CURLOPT_HTTPHEADER, headers);
 
@@ -191,7 +192,7 @@ bool HttpClient::UploadFile(const std::string& url, const std::string& fileName)
     curl_easy_setopt(this->curl, CURLOPT_READFUNCTION, UploadFile_ReadDataCallback);
     curl_easy_setopt(this->curl, CURLOPT_READDATA, (void *)&inFile);
     curl_easy_setopt(this->curl, CURLOPT_UPLOAD, 1L);
-    curl_easy_setopt(this->curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(this->curl, CURLOPT_URL, (char *)url.c_str());
 
     inFile.seekg(0, ios_base::end);
     if (inFile.bad() || inFile.fail()){

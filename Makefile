@@ -17,8 +17,8 @@ TESTS := $(wildcard tests/*.cpp)
 #
 CC     := g++
 CFLAGS := -std=c++17 -Wall -Werror -Wextra
-CLIBS := -lstdc++fs -lSimpleAmqpClient -lcurl -lpthread
-EXE  := workerapp
+CLIBS  := -Wl,-Bstatic -lstdc++fs -lSimpleAmqpClient -lrabbitmq -lboost_chrono -lboost_system -lcurl -lssl -lcrypto -Wl,-Bdynamic -lpthread -ldl
+EXE    := workerapp
 
 #
 # Debug build settings
@@ -39,9 +39,10 @@ RELCFLAGS := -O3 -DNDEBUG -D_FORTIFY_SOURCE=2 -D_GLIBCXX_ASSERTIONS -fstack-prot
 #
 TESTDIR := tests/bin
 TESTEXE := $(TESTDIR)/workerapp-test
-TESTCFLAGS := -O3 -g -DDEBUG -lgtest_main -lgtest
+TESTCFLAGS := -O3 -g -DDEBUG 
+TESTCLIBS := -lgtest_main -lgtest
 
-.PHONY: all clean debug prepare release
+.PHONY: all clean debug prepare release test remake
 
 # Default build
 all: prepare release debug
@@ -66,10 +67,10 @@ $(RELEXE): $(SRCS)
 # Tests
 #
 test: prepare $(TESTEXE)
-	$(TESTEXE)
+	./$(TESTEXE)
 
 $(TESTEXE): $(TESTS) $(SRCS) 
-	$(CC) $(CFLAGS) $(TESTCFLAGS) -o $(TESTEXE) $(filter-out src/main.cpp, $^) $(CLIBS)
+	$(CC) $(CFLAGS) $(TESTCFLAGS) -o $(TESTEXE) $(filter-out src/main.cpp, $^) $(CLIBS) $(TESTCLIBS)
 
 #
 # Other rules

@@ -21,7 +21,7 @@ class UploadMessage {
 
     string fileID;
 
-    void Treat();
+    bool Treat();
     void Success();
     void Fail(string& error);
 

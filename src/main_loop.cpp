@@ -15,9 +15,13 @@ using namespace std;
 using namespace AmqpClient;
 using json = nlohmann::json;
 
-void MessageThreadRoutine (std::unique_ptr<UploadMessage> msg){
+void MessageThreadRoutine (std::unique_ptr<UploadMessage> msg, Envelope::ptr_t envelope, string consumerTag, Channel::ptr_t channel){
     cout << "Thread started for message with fileID = " << msg->fileID << endl;
-    msg->Treat();
+    if (!msg->Treat()){
+        channel->BasicCancel(consumerTag);
+        return;
+    }
+    channel->BasicAck(envelope);
 };
 
 void MainLoop(){
@@ -52,7 +56,7 @@ void MainLoop(){
         queue, 
         "",   //  consumer tag
         true, //  no-local
-        true, //. auto-ack
+        false, //. auto-ack
         false //  exclusive subscribe
     );
 
@@ -71,7 +75,11 @@ void MainLoop(){
             cout << body << endl;
             thread t (
                 MessageThreadRoutine, 
-                make_unique<UploadMessage>(body));
+                make_unique<UploadMessage>(body),
+                envelope,
+                consumerTag,
+                channel
+            );
             t.detach();
         } 
         

@@ -21,6 +21,6 @@ bool compareFiles(const std::string& p1, const std::string& p2) {
   f2.seekg(0, std::ifstream::beg);
 
   return std::equal(std::istreambuf_iterator<char>(f1.rdbuf()),
-                    std::istreambuf_iterator<char>(),
-                    std::istreambuf_iterator<char>(f2.rdbuf()));
+    std::istreambuf_iterator<char>(),
+     std::istreambuf_iterator<char>(f2.rdbuf()));
 }

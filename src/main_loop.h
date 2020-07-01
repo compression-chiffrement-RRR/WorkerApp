@@ -3,5 +3,12 @@
 #include <memory>
 #include "UploadMessage.h"
 
+#include <SimpleAmqpClient/SimpleAmqpClient.h>
+#include <string>
+
+using namespace std;
+using namespace AmqpClient;
+using json = nlohmann::json;
+
 void MainLoop();
-void TreatMessageThreadRoutine (std::unique_ptr<UploadMessage> msg);
+void MessageThreadRoutine (std::unique_ptr<UploadMessage> msg, Envelope::ptr_t envelope, string consumerTag, Channel::ptr_t channel);

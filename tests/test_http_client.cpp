@@ -69,7 +69,7 @@ namespace {
         
         HttpClient client;
         const string url = "https://the.earth.li/~sgtatham/putty/latest/w32/putty.exe";
-        const string output = "/root/tests/testfiles/putty.exe";
+        const string output = "/app/tests/testfiles/putty.exe";
 
         ASSERT_EQ(true, client.DownloadFile(url, output));
 
@@ -83,7 +83,7 @@ namespace {
 
         ASSERT_EQ(true, client.SendPostRequest(webhook, body));
 
-        const string filenamePath = "/root/tests/testfiles/lorem.txt";
+        const string filenamePath = "/app/tests/testfiles/lorem.txt";
 
         ASSERT_EQ(true, client.UploadFile(webhook, filenamePath));
     }

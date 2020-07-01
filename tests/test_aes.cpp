@@ -215,9 +215,9 @@ TEST(AESTest, EncryptAndDecrypt_File_CBC_128){
         0xba, 0x29, 0x03, 0x49
     };
 
-    const string original = "/root/tests/testfiles/lorem.txt";
-    const string encrypted = "/root/tests/testfiles/lorem.enc.txt";
-    const string decrypted = "/root/tests/testfiles/lorem.dec.txt";
+    const string original = "/app/tests/testfiles/lorem.txt";
+    const string encrypted = "/app/tests/testfiles/lorem.enc.txt";
+    const string decrypted = "/app/tests/testfiles/lorem.dec.txt";
 
     AES aes (AESKeySize::AES_128, AESMode::CBC, key, iv);
 

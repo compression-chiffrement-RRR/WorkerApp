@@ -17,11 +17,11 @@ TEST(HuffmanTest, EncryptAndCompress_File){
     
     AES aes(AESKeySize::AES_128, AESMode::ECB, key);
 
-    const string original = "/root/tests/testfiles/iso.txt";
-    const string encrypted = "/root/tests/testfiles/iso.encrypted.txt";
-    const string compressed = "/root/tests/testfiles/iso.compressed.txt";
-    const string decompressed = "/root/tests/testfiles/iso.decompressed.txt";
-    const string decrypted = "/root/tests/testfiles/iso.decrypted.txt";
+    const string original = "/app/tests/testfiles/iso.txt";
+    const string encrypted = "/app/tests/testfiles/iso.encrypted.txt";
+    const string compressed = "/app/tests/testfiles/iso.compressed.txt";
+    const string decompressed = "/app/tests/testfiles/iso.decompressed.txt";
+    const string decrypted = "/app/tests/testfiles/iso.decrypted.txt";
 
     ASSERT_EQ(0, aes.EncryptFile(original, encrypted));
     ASSERT_EQ(true, huffman.CompressFile(encrypted, compressed));

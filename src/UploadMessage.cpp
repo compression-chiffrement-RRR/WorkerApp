@@ -236,9 +236,7 @@ UploadMessage::UploadMessage (json& body){
 
 UploadMessage::~UploadMessage(){};
 
-void UploadMessage::Treat (){
-
-
+bool UploadMessage::Treat (){
 
     HttpClient http;
     string tmpPath = RandomTmpFilename(20), newTmpPath;
@@ -247,7 +245,7 @@ void UploadMessage::Treat (){
         string error = string("Failed to download ") + this->fileUrl;
         cout << error << endl;
         this->Fail(error);
-        return;
+        return false;
     }
 
     for (size_t i = 0; i < processes.size(); i ++){
@@ -258,14 +256,14 @@ void UploadMessage::Treat (){
             string error = string("Failed to process file ") + tmpPath;
             cout << error << endl;
             this->Fail(error);
-            return;
+            return false;
         }
 
         if (remove(tmpPath.c_str()) != 0){
             string error = string("Failed to remove temp file ") + tmpPath;
             cout << error << endl;
             this->Fail(error);
-            return;
+            return false;
         }
 
         tmpPath = newTmpPath;
@@ -276,7 +274,7 @@ void UploadMessage::Treat (){
         string error = string("Couldn't upload processed file to ") + this->uploadUrl;
         cout << error << endl;
         this->Fail(error);
-        return;
+        return false;
     }
 
     if (remove(tmpPath.c_str()) != 0){
@@ -287,6 +285,8 @@ void UploadMessage::Treat (){
     this->Success();
 
     cout << "Successfully processed file " << this->fileID << endl;
+
+    return true;
 }
 
 void UploadMessage::Success(){
