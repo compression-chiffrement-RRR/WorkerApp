@@ -23,6 +23,8 @@ cd /var/tmp
 git clone https://github.com/alanxz/SimpleAmqpClient
 
 cd /var/tmp/SimpleAmqpClient
+find . -type f -exec sed -i 's/^#define *BROKER_HEARTBEAT *0/#define BROKER_HEARTBEAT 10/g' {} +
+cat src/ChannelImpl.cpp
 mkdir build
 cd /var/tmp/SimpleAmqpClient/build
 cmake .. && make install

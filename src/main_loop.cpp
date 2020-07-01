@@ -40,9 +40,9 @@ void MainLoop(){
     channel->DeclareQueue(
         queue, 
         false, // passive queue
-        true, // durable queue
+        true,  // durable queue
         false, // exclusive queue
-        false // auto-delete queue
+        false  // auto-delete queue
     );
 
     cout << "Queue created." << endl;
@@ -50,10 +50,10 @@ void MainLoop(){
     // subscribe as a consumer
     string consumerTag = channel->BasicConsume(
         queue, 
-        "",  // consumer tag
-        true, // no-local
+        "",   //  consumer tag
+        true, //  no-local
         true, //. auto-ack
-        false // exclusive subscribe
+        false //  exclusive subscribe
     );
 
     cout << "Successfully subscribed to queue" << endl;
@@ -62,8 +62,7 @@ void MainLoop(){
     while (true){
 
         Envelope::ptr_t envelope;
-        if (channel->BasicConsumeMessage(consumerTag, envelope, 10000) != true)
-            continue;
+        channel->BasicConsumeMessage(consumerTag, envelope);
             
         try {
 
