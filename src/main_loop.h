@@ -11,4 +11,4 @@ using namespace AmqpClient;
 using json = nlohmann::json;
 
 void MainLoop();
-void MessageThreadRoutine (std::unique_ptr<UploadMessage> msg, Envelope::ptr_t envelope, string consumerTag, Channel::ptr_t channel);
+void MessageThreadRoutine (std::unique_ptr<UploadMessage> msg);
