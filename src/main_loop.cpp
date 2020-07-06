@@ -71,7 +71,7 @@ void MainLoop(){
             cout << body << endl;
             thread t (
                 MessageThreadRoutine, 
-                make_unique<UploadMessage>(body),
+                make_unique<UploadMessage>(body)
             );
             t.detach();
         } 
