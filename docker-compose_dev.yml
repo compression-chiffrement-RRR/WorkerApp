@@ -15,7 +15,8 @@ services:
             - 5672:5672
             - 15672:15672
     worker_1:
-        image: worker_app_dev
+        image: worker_app
+        command: "/app/workerapp"
         container_name: worker_app_1
         environment:
             WORKER_APP_RABBITMQ_HOST: rabbitmq

@@ -224,9 +224,20 @@ void Huffman::ExtractDictionnary(uint8_t *buffer, size_t length){
     }
 };
 
+size_t Huffman::MaxSymbolLength (){
+    
+    size_t max = 0;
+    for (size_t i = 0; i < 256; i ++){
+        size_t s = this->codesMap[i].size();
+        if (s > max)
+            max = s;
+    }
+    return max;
+}
+
 /* PUBLIC FUNCTIONS */
 
-#define HUFFMAN_BUFFER_SIZE 8192 * 64
+#define HUFFMAN_BUFFER_SIZE 8192
 
 bool Huffman::CompressFile(const std::string& inputPath, const std::string& outputPath){
 
@@ -239,9 +250,8 @@ bool Huffman::CompressFile(const std::string& inputPath, const std::string& outp
     size_t read = 0, sizeOfDictionnary = 0;
 
     buffer = new uint8_t[HUFFMAN_BUFFER_SIZE];
-    output = new uint8_t[HUFFMAN_BUFFER_SIZE];
 
-    if (buffer == nullptr || output == nullptr)
+    if (buffer == nullptr)
         goto clean;
 
     in.open(inputPath, std::ifstream::binary);
@@ -274,6 +284,11 @@ bool Huffman::CompressFile(const std::string& inputPath, const std::string& outp
     this->CreateTempNodes();
     this->CreateDictionnary();
     this->GetCodes(this->dictionnary, {});
+
+    output = new uint8_t[HUFFMAN_BUFFER_SIZE * (this->MaxSymbolLength())];
+
+    if (output == nullptr)
+        goto clean;
 
     in.clear();
     in.seekg(0);

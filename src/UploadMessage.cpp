@@ -16,6 +16,7 @@ using json = nlohmann::json;
 #include "Process.h"
 #include "CompressionProcess.h"
 #include "EncryptionProcess.h"
+#include "WorkerEnv.h"
 
 using json = nlohmann::json;
 using namespace std;

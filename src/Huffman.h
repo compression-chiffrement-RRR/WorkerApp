@@ -43,10 +43,10 @@ class Huffman {
     void ExtractDictionnary(uint8_t *buffer, size_t sizeOfDictionnary);
     void Decompress(uint8_t *bytes, size_t *length, uint8_t *output);
 
+    size_t MaxSymbolLength ();
+
     public:
 
-    //bool CompressBuffer(uint8_t *bytes, size_t length);
-    //bool DecompressBufer(uint8_t *bytes, size_t length);
     bool CompressFile(const std::string& input, const std::string& output);
     bool DecompressFile(const std::string& input, const std::string& output);
 

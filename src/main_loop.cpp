@@ -69,10 +69,12 @@ void MainLoop(){
             cout << "Message received. Parsing JSON..." << endl;
             json body = json::parse(envelope->Message()->Body());
             cout << body << endl;
+
             thread t (
                 MessageThreadRoutine, 
                 make_unique<UploadMessage>(body)
             );
+            
             t.detach();
         } 
         
